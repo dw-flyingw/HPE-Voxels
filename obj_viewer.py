@@ -95,11 +95,11 @@ def render_obj_viewer(file_path, height=600):
                 renderer.setSize(window.innerWidth, {height});
                 renderer.outputColorSpace = THREE.SRGBColorSpace;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.0;
+                renderer.toneMappingExposure = 1.5;
                 document.getElementById('canvas').appendChild(renderer.domElement);
                 
-                // Simple ambient light for basic visibility
-                const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+                // Enhanced ambient light for brighter display
+                const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
                 scene.add(ambientLight);
                 
                 // Controls

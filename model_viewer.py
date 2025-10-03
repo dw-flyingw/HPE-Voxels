@@ -124,7 +124,7 @@ def render_glb_viewer(file_path, height=600):
                 renderer.setSize(window.innerWidth, {height});
                 renderer.outputColorSpace = THREE.SRGBColorSpace;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.0;
+                renderer.toneMappingExposure = 1.5;
                 document.getElementById('canvas').appendChild(renderer.domElement);
                 
                 // Simple ambient light for basic visibility
@@ -993,11 +993,11 @@ def create_simple_textured_viewer(gltf_info, height=600):
             renderer.setSize(window.innerWidth, {height});
             document.getElementById('canvas').appendChild(renderer.domElement);
             
-            // Simple lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            // Enhanced lighting for brighter display
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
             scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(5, 5, 5);
             scene.add(directionalLight);
             
