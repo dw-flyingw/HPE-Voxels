@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-generate_diffuse_textures.py
+generate_placeholder_diffuse_textures.py
 
-Generates diffuse.png textures for all models in the models folder based on vista3d_label_colors.json.
-This script creates anatomically-colored textures with subtle variations to simulate tissue appearance.
+Generates simple placeholder diffuse.png textures for all models in the models folder based on vista3d_label_colors.json.
+This script creates solid color textures using the anatomical colors from the JSON file.
 
 Usage:
-    python generate_diffuse_textures.py
-    python generate_diffuse_textures.py --size 1024  # for higher resolution
-    python generate_diffuse_textures.py --models-dir ./output/models
+    python generate_placeholder_diffuse_textures.py
+    python generate_placeholder_diffuse_textures.py --size 1024  # for higher resolution
+    python generate_placeholder_diffuse_textures.py --models-dir ./output/models
 """
 
 import os
@@ -45,44 +45,17 @@ def load_label_info(json_path: str) -> dict:
 
 def create_diffuse_texture(color: list, size: int = 512) -> PILImage.Image:
     """
-    Create a diffuse texture with the specified color from vista3d_label_colors.json.
+    Create a simple placeholder diffuse texture with the specified color from vista3d_label_colors.json.
     
     Args:
         color: RGB color as [r, g, b] where each value is 0-255
         size: Texture size in pixels (will be square)
         
     Returns:
-        PIL Image object with the textured diffuse map
+        PIL Image object with the placeholder diffuse map
     """
-    # Create a solid color image with the anatomical color
-    img = PILImage.new('RGB', (size, size), tuple(color))
-    
-    # Add subtle anatomical-like texture variation
-    img_array = np.array(img)
-    
-    # Create a subtle gradient pattern to simulate tissue texture
-    x, y = np.meshgrid(np.linspace(0, 1, size), np.linspace(0, 1, size))
-    
-    # Add subtle noise based on the color intensity
-    base_intensity = np.mean(color)
-    noise_scale = max(5, base_intensity * 0.05)  # Scale noise based on color brightness
-    
-    # Generate organic-looking noise pattern
-    noise = np.random.normal(0, noise_scale, img_array.shape)
-    
-    # Add subtle gradient variations
-    gradient_x = np.sin(x * np.pi * 2) * noise_scale * 0.3
-    gradient_y = np.cos(y * np.pi * 2) * noise_scale * 0.3
-    
-    # Combine noise and gradients
-    texture_variation = noise + gradient_x[:, :, np.newaxis] + gradient_y[:, :, np.newaxis]
-    
-    # Apply the variation while preserving the base color
-    img_array = img_array + texture_variation
-    img_array = np.clip(img_array, 0, 255).astype(np.uint8)
-    
-    # Convert back to PIL Image
-    return PILImage.fromarray(img_array)
+    # Create a simple solid color image with the anatomical color
+    return PILImage.new('RGB', (size, size), tuple(color))
 
 
 def get_color_for_model(model_name: str, label_info: dict) -> list:
@@ -175,7 +148,7 @@ def main():
     """Main function to generate diffuse textures for all models."""
     
     parser = argparse.ArgumentParser(
-        description='Generate diffuse.png textures for all models based on vista3d_label_colors.json'
+        description='Generate simple placeholder diffuse.png textures for all models based on vista3d_label_colors.json'
     )
     parser.add_argument(
         '--models-dir',
@@ -233,7 +206,7 @@ def main():
         return 1
     
     print(f"\n{'='*60}")
-    print(f"🎨 Diffuse Texture Generator")
+    print(f"🎨 Placeholder Diffuse Texture Generator")
     print(f"{'='*60}")
     print(f"Models directory: {models_dir}")
     print(f"Found {len(model_dirs)} model(s)")

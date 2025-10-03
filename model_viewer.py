@@ -558,8 +558,49 @@ def create_threejs_viewer_with_textures(gltf_info, height=600):
             controls.enablePan = true;
             controls.enableRotate = true;
             
-            {texture_loading_code}
-            {material_creation_code}
+            // Load textures
+            const textures = {json.dumps(gltf_info['textures'])};
+            const textureLoader = new THREE.TextureLoader();
+            
+            // Create materials
+            const materialsData = {json.dumps(gltf_info['materials'])};
+            const materials = {{}};
+            
+            // Create Three.js materials from the material data
+            for (const [key, matData] of Object.entries(materialsData)) {{
+                const material = new THREE.MeshStandardMaterial({{
+                    name: matData.name || `material_${{key}}`,
+                    side: matData.doubleSided ? THREE.DoubleSide : THREE.FrontSide
+                }});
+                
+                // Handle PBR properties
+                if (matData.baseColorFactor) {{
+                    material.color.setRGB(
+                        matData.baseColorFactor[0],
+                        matData.baseColorFactor[1], 
+                        matData.baseColorFactor[2]
+                    );
+                    if (matData.baseColorFactor.length > 3) {{
+                        material.opacity = matData.baseColorFactor[3];
+                        material.transparent = matData.baseColorFactor[3] < 1.0;
+                    }}
+                }}
+                
+                // Handle textures
+                if (matData.baseColorTexture) {{
+                    const texture = textureLoader.load(matData.baseColorTexture);
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    material.map = texture;
+                }}
+                
+                if (matData.diffuseTexture) {{
+                    const texture = textureLoader.load(matData.diffuseTexture);
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    material.map = texture;
+                }}
+                
+                materials[key] = material;
+            }}
             
             // Debug materials and textures
             console.log('Available textures:', Object.keys(textures));
@@ -695,6 +736,9 @@ def create_threejs_viewer_with_textures(gltf_info, height=600):
             
             console.log('Camera positioned at:', camera.position);
             console.log('Camera looking at:', new THREE.Vector3(0, 0, 0));
+            
+            // Hide loading message
+            document.getElementById('loading').style.display = 'none';
             
             // Animation loop
             function animate() {{
