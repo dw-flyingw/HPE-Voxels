@@ -1,0 +1,40 @@
+[project]
+name = "hpe-voxel"
+version = "0.1.0"
+description = "Voxel Textures"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit>=1.50.0",
+    "nibabel>=5.2.1",
+    "numpy>=1.26.4",
+    "scipy>=1.14.0",
+    "pygltflib>=1.15.0",
+    "open3d>=0.18.0",
+    "scikit-image>=0.23.0",
+    "trimesh>=4.0.0",
+    "pillow>=11.3.0",
+    "tqdm>=4.66.4",
+    "fast-simplification>=0.1.1",
+    "packaging",
+    "typing-extensions",
+    "lazy_loader",
+    "plotly",
+    "dash",
+    "Flask",
+    "Werkzeug",
+    "MarkupSafe",
+    "click",
+    "blinker",
+    "Jinja2",
+    "itsdangerous",
+    "narwhals",
+    "importlib-metadata",
+    "scikit-learn",
+    "joblib",
+    "protobuf",
+    "threadpoolctl",
+]
+
+[tool.setuptools.packages.find]
+exclude = ["input", "output", "__pycache__", ".venv"]
