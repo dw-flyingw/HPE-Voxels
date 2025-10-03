@@ -115,7 +115,11 @@ def process_model_directory(model_dir: Path, label_info: dict, texture_size: int
         True if successful, False otherwise
     """
     model_name = model_dir.name
-    diffuse_path = model_dir / "diffuse.png"
+    textures_dir = model_dir / "textures"
+    diffuse_path = textures_dir / "diffuse.png"
+    
+    # Create textures directory if it doesn't exist
+    textures_dir.mkdir(exist_ok=True)
     
     # Check if diffuse.png already exists
     if diffuse_path.exists() and not overwrite:

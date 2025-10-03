@@ -9,7 +9,7 @@ Each model folder will contain:
 - scene.glb (the original GLB file)
 - scene.gltf (extracted glTF JSON)
 - scene.bin (extracted binary data)
-- diffuse.png (extracted texture, if present)
+- textures/diffuse.png (extracted texture, if present)
 """
 
 import os
@@ -77,7 +77,7 @@ def update_gltf_with_texture_reference(gltf_path, model_dir):
             gltf_data['images'] = []
         
         gltf_data['images'].append({
-            "uri": "diffuse.png"
+            "uri": "textures/diffuse.png"
         })
         
         # Add texture reference
@@ -136,8 +136,12 @@ def update_gltf_with_texture_reference(gltf_path, model_dir):
 
 
 def extract_textures_from_gltf(gltf, output_dir):
-    """Extract textures from glTF and save as diffuse.png, or create placeholder"""
+    """Extract textures from glTF and save as textures/diffuse.png, or create placeholder"""
     textures_extracted = False
+    
+    # Create textures directory
+    textures_dir = os.path.join(output_dir, "textures")
+    os.makedirs(textures_dir, exist_ok=True)
     
     if not gltf.images:
         print("  No textures found in GLB file - creating placeholder texture")
@@ -147,9 +151,9 @@ def extract_textures_from_gltf(gltf, output_dir):
         texture_data = create_placeholder_texture(color)
         
         # Save placeholder texture
-        with open(os.path.join(output_dir, "diffuse.png"), 'wb') as f:
+        with open(os.path.join(textures_dir, "diffuse.png"), 'wb') as f:
             f.write(texture_data)
-        print(f"  Created placeholder texture: diffuse.png (color: RGB{color})")
+        print(f"  Created placeholder texture: textures/diffuse.png (color: RGB{color})")
         textures_extracted = True
         return textures_extracted
     
@@ -167,9 +171,9 @@ def extract_textures_from_gltf(gltf, output_dir):
             # Try to load as PIL Image
             try:
                 img = Image.open(io.BytesIO(image_data))
-                # Save as diffuse.png
-                img.save(os.path.join(output_dir, "diffuse.png"))
-                print(f"  Extracted texture: diffuse.png")
+                # Save as textures/diffuse.png
+                img.save(os.path.join(textures_dir, "diffuse.png"))
+                print(f"  Extracted texture: textures/diffuse.png")
                 textures_extracted = True
                 break  # Use first texture found
             except Exception as e:
@@ -203,7 +207,7 @@ def update_gltf_with_texture_reference(gltf_path, model_dir):
         
         # Add image entry
         image_entry = {
-            "uri": "diffuse.png"
+            "uri": "textures/diffuse.png"
         }
         gltf_data['images'].append(image_entry)
         
