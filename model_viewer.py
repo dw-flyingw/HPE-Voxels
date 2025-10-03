@@ -336,6 +336,68 @@ def get_available_model_folders():
     
     return sorted(available_folders)
 
+def extract_uvs_from_gltf(gltf_data, model_folder):
+    """Extract UV coordinates from GLTF accessors."""
+    try:
+        # Look for TEXCOORD_0 accessor in meshes
+        uvs = []
+        
+        if 'meshes' in gltf_data:
+            for mesh in gltf_data['meshes']:
+                for primitive in mesh.get('primitives', []):
+                    attributes = primitive.get('attributes', {})
+                    
+                    # Look for TEXCOORD_0 attribute
+                    if 'TEXCOORD_0' in attributes:
+                        texcoord_index = attributes['TEXCOORD_0']
+                        accessor = gltf_data['accessors'][texcoord_index]
+                        
+                        # Load UV data from buffer
+                        buffer_view_index = accessor['bufferView']
+                        buffer_view = gltf_data['bufferViews'][buffer_view_index]
+                        buffer_index = buffer_view['buffer']
+                        buffer_info = gltf_data['buffers'][buffer_index]
+                        
+                        # Read buffer data
+                        buffer_path = os.path.join(model_folder, buffer_info['uri'])
+                        with open(buffer_path, 'rb') as f:
+                            buffer_data = f.read()
+                        
+                        # Extract UV coordinates
+                        byte_offset = buffer_view.get('byteOffset', 0) + accessor.get('byteOffset', 0)
+                        uv_data = buffer_data[byte_offset:byte_offset + buffer_view['byteLength']]
+                        
+                        # Convert to numpy array (assuming FLOAT32)
+                        uv_array = np.frombuffer(uv_data, dtype=np.float32)
+                        uv_array = uv_array.reshape(-1, 2)  # Each UV pair has 2 components
+                        
+                        uvs.extend(uv_array)
+        
+        print(f"UV extraction result: {len(uvs)} UV coordinates found")
+        return np.array(uvs) if uvs else np.array([])
+    except Exception as e:
+        print(f"Error extracting UVs from GLTF: {e}")
+        return np.array([])
+
+def find_texture_in_folder(model_folder):
+    """Find texture files in model folder as fallback."""
+    texture_extensions = ['.png', '.jpg', '.jpeg', '.tga', '.bmp']
+    texture_files = []
+    
+    # Check textures subfolder
+    textures_folder = os.path.join(model_folder, 'textures')
+    if os.path.exists(textures_folder):
+        for file in os.listdir(textures_folder):
+            if any(file.lower().endswith(ext) for ext in texture_extensions):
+                texture_files.append(os.path.join('textures', file))
+    
+    # Check root folder
+    for file in os.listdir(model_folder):
+        if any(file.lower().endswith(ext) for ext in texture_extensions):
+            texture_files.append(file)
+    
+    return texture_files
+
 def load_gltf_with_textures(gltf_path):
     """Load GLTF file and return model data with proper texture handling."""
     try:
@@ -346,7 +408,9 @@ def load_gltf_with_textures(gltf_path):
         model_folder = os.path.dirname(gltf_path)
         
         # Load mesh data using trimesh (more reliable for geometry)
+        print(f"Loading GLTF file: {gltf_path}")
         scene_or_mesh = trimesh.load(gltf_path)
+        print(f"Loaded mesh: {type(scene_or_mesh)}")
         
         # Extract mesh data
         vertices = []
@@ -385,9 +449,13 @@ def load_gltf_with_textures(gltf_path):
                     uvs = np.vstack(uvs_list)
                 if colors_list:
                     colors = np.vstack(colors_list)
+                print(f"Scene: {len(vertices)} vertices, {len(faces)} faces")
+            else:
+                print("No vertices found in scene")
         else:  # Single Mesh object
             vertices = scene_or_mesh.vertices
             faces = scene_or_mesh.faces
+            print(f"Single mesh: {len(vertices)} vertices, {len(faces)} faces")
             
             # Get UV coordinates if available
             if hasattr(scene_or_mesh.visual, 'uv') and scene_or_mesh.visual.uv is not None:
@@ -398,6 +466,12 @@ def load_gltf_with_textures(gltf_path):
                 colors = scene_or_mesh.visual.vertex_colors
             elif hasattr(scene_or_mesh.visual, 'face_colors') and scene_or_mesh.visual.face_colors is not None:
                 colors = scene_or_mesh.visual.face_colors
+        
+        # If no UVs extracted from trimesh, try to extract from GLTF directly
+        if len(uvs) == 0:
+            print("No UVs from trimesh, attempting GLTF extraction...")
+            uvs = extract_uvs_from_gltf(gltf_data, model_folder)
+            print(f"GLTF UV extraction result: {len(uvs)} UVs")
         
         # Extract texture information
         textures_info = {}
@@ -414,6 +488,19 @@ def load_gltf_with_textures(gltf_path):
                             ext = os.path.splitext(image['uri'])[1].lower()
                             mime_type = f"image/{ext[1:]}" if ext in ['.png', '.jpg', '.jpeg'] else "image/png"
                             textures_info[i] = f"data:{mime_type};base64,{img_base64}"
+        
+        # If no textures found in GLTF, search for textures in folder as fallback
+        if not textures_info:
+            texture_files = find_texture_in_folder(model_folder)
+            for i, texture_file in enumerate(texture_files):
+                texture_path = os.path.join(model_folder, texture_file)
+                if os.path.exists(texture_path):
+                    with open(texture_path, 'rb') as img_file:
+                        img_data = img_file.read()
+                        img_base64 = base64.b64encode(img_data).decode('utf-8')
+                        ext = os.path.splitext(texture_file)[1].lower()
+                        mime_type = f"image/{ext[1:]}" if ext in ['.png', '.jpg', '.jpeg'] else "image/png"
+                        textures_info[i] = f"data:{mime_type};base64,{img_base64}"
         
         # Extract material information
         materials_info = {}
@@ -441,7 +528,19 @@ def load_gltf_with_textures(gltf_path):
                             tex_index = sg['diffuseTexture']['index']
                             materials_info[i]['diffuseTexture'] = textures_info.get(tex_index)
         
-        return {
+        # If no materials found or no textures in materials, create default material with fallback texture
+        if not materials_info or not any(mat.get('baseColorTexture') or mat.get('diffuseTexture') for mat in materials_info.values()):
+            if textures_info:
+                # Use first available texture for default material
+                default_texture = list(textures_info.values())[0]
+                materials_info[0] = {
+                    'name': 'default_material',
+                    'doubleSided': True,
+                    'diffuseTexture': default_texture,
+                    'diffuseFactor': [1, 1, 1, 1]
+                }
+        
+        result = {
             'gltf_data': gltf_data,
             'textures': textures_info,
             'materials': materials_info,
@@ -451,29 +550,399 @@ def load_gltf_with_textures(gltf_path):
             'uvs': uvs,
             'colors': colors
         }
+        
+        print(f"Final result: {len(vertices)} vertices, {len(faces)} faces, {len(uvs)} UVs, {len(textures_info)} textures, {len(materials_info)} materials")
+        return result
     except Exception as e:
         st.error(f"Error loading GLTF with textures: {e}")
         return None
 
-def create_threejs_viewer_with_textures(gltf_info, height=600):
-    """Create Three.js viewer HTML using proper GLTFLoader."""
+#def create_threejs_viewer_with_textures_DISABLED(gltf_info, height=600):
+#    """Create Three.js viewer HTML using proper GLTFLoader."""
+#    
+#    model_folder = gltf_info['model_folder']
+#    
+#    # Prepare mesh data for JavaScript
+#    mesh_data_js = {
+#        'vertices': gltf_info['vertices'].tolist() if len(gltf_info['vertices']) > 0 else [],
+#        'faces': gltf_info['faces'].tolist() if len(gltf_info['faces']) > 0 else [],
+#        'uvs': gltf_info['uvs'].tolist() if len(gltf_info['uvs']) > 0 else [],
+#        'colors': gltf_info['colors'].tolist() if len(gltf_info['colors']) > 0 else []
+#    }
+#    
+#    # Convert to JSON string safely
+#    mesh_data_json = json.dumps(mesh_data_js)
+#    
+#    # Get the GLTF file path relative to the model folder
+#    gltf_file_name = "scene.gltf"  # Default name
+#    if os.path.exists(os.path.join(model_folder, "scene.gltf")):
+#        gltf_file_name = "scene.gltf"
+#    elif os.path.exists(os.path.join(model_folder, "scene.glb")):
+#        gltf_file_name = "scene.glb"
+#    
+#    # Create a data URL for the GLTF file
+#    gltf_path = os.path.join(model_folder, gltf_file_name)
+#    with open(gltf_path, 'rb') as f:
+#        gltf_data_bytes = f.read()
+#    
+#    gltf_base64 = base64.b64encode(gltf_data_bytes).decode('utf-8')
+#    gltf_data_url = f"data:model/gltf-binary;base64,{gltf_base64}"
+#    
+#    viewer_html = f"""
+#    <!DOCTYPE html>
+#    <html>
+#    <head>
+#        <style>
+#            body {{ margin: 0; padding: 0; overflow: hidden; }}
+#            #canvas {{ width: 100%; height: {height}px; }}
+#            #controls {{
+#                position: absolute;
+#                top: 10px;
+#                left: 10px;
+#                background: rgba(0,0,0,0.7);
+#                color: white;
+#                padding: 10px;
+#                border-radius: 5px;
+#                font-family: Arial, sans-serif;
+#                font-size: 12px;
+#                z-index: 1000;
+#            }}
+#            #loading {{
+#                position: absolute;
+#                top: 50%;
+#                left: 50%;
+#                transform: translate(-50%, -50%);
+#                color: white;
+#                font-size: 18px;
+#                z-index: 1001;
+#            }}
+#        </style>
+#    </head>
+#    <body>
+#        <div id="controls">
+#            🖱️ Left-click: Rotate | Right-click: Pan | Scroll: Zoom
+#        </div>
+#        <div id="loading">Loading 3D model...</div>
+#        <div id="canvas"></div>
+#        
+#        <script type="importmap">
+#        {{
+#            "imports": {{
+#                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+#                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+#            }}
+#        }}
+#        </script>
+#        
+#        <script type="module">
+#            try {{
+#            import * as THREE from 'three';
+#            import {{ OrbitControls }} from 'three/addons/controls/OrbitControls.js';
+#            import {{ GLTFLoader }} from 'three/addons/loaders/GLTFLoader.js';
+#            
+#            // Scene setup
+#            const scene = new THREE.Scene();
+#            scene.background = new THREE.Color(0x000000);
+#            
+#            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / {height}, 0.1, 1000);
+#            const renderer = new THREE.WebGLRenderer({{ antialias: true }});
+#            renderer.setSize(window.innerWidth, {height});
+#            renderer.outputColorSpace = THREE.SRGBColorSpace;
+#            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+#            renderer.toneMappingExposure = 1.0;
+#            document.getElementById('canvas').appendChild(renderer.domElement);
+#            
+#            // Lighting setup for PBR materials
+#            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+#            scene.add(ambientLight);
+#            
+#            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+#            directionalLight.position.set(5, 5, 5);
+#            directionalLight.castShadow = true;
+#            scene.add(directionalLight);
+#            
+#            const hemisphereLight = new THREE.HemisphereLight(0x87CEEB, 0x362d1d, 0.3);
+#            scene.add(hemisphereLight);
+#            
+#            // Controls
+#            const controls = new OrbitControls(camera, renderer.domElement);
+#            controls.enableDamping = true;
+#            controls.dampingFactor = 0.05;
+#            controls.enableZoom = true;
+#            controls.enablePan = true;
+#            controls.enableRotate = true;
+#            
+#            // Load textures
+#            const textures = {json.dumps(gltf_info['textures'])};
+#            const textureLoader = new THREE.TextureLoader();
+#            
+#            // Create materials
+#            const materialsData = {json.dumps(gltf_info['materials'])};
+#            const materials = {{}};
+#            
+#            // Create Three.js materials from the material data
+#            for (const [key, matData] of Object.entries(materialsData)) {{
+#                const material = new THREE.MeshStandardMaterial();
+#                material.name = matData.name || 'material_' + key;
+#                material.side = matData.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
+#                
+#                // Handle PBR properties
+#                if (matData.baseColorFactor) {{
+#                    material.color.setRGB(
+#                        matData.baseColorFactor[0],
+#                        matData.baseColorFactor[1], 
+#                        matData.baseColorFactor[2]
+#                    );
+#                    if (matData.baseColorFactor.length > 3) {{
+#                        material.opacity = matData.baseColorFactor[3];
+#                        material.transparent = matData.baseColorFactor[3] < 1.0;
+#                    }}
+#                }}
+#                
+#                // Handle textures
+#                if (matData.baseColorTexture) {{
+#                    const texture = textureLoader.load(matData.baseColorTexture);
+#                    texture.colorSpace = THREE.SRGBColorSpace;
+#                    material.map = texture;
+#                }}
+#                
+#                if (matData.diffuseTexture) {{
+#                    const texture = textureLoader.load(matData.diffuseTexture);
+#                    texture.colorSpace = THREE.SRGBColorSpace;
+#                    material.map = texture;
+#                }}
+#                
+#                materials[key] = material;
+#            }}
+#            
+#            // Debug materials and textures
+#            console.log('Available textures:', Object.keys(textures));
+#            console.log('Available materials:', Object.keys(materials));
+#            if (Object.keys(materials).length > 0) {{
+#                console.log('First material:', materials[0]);
+#            }}
+#            
+#            // Load model using trimesh data (more reliable)
+#            const model = new THREE.Group();
+#            
+#            // Get mesh data from trimesh (passed from Python)
+#            const meshData = {mesh_data_json};
+#            
+#            // Debug mesh data
+#            console.log('Mesh data loaded:', {
+#                vertices: meshData.vertices ? meshData.vertices.length : 0,
+#                faces: meshData.faces ? meshData.faces.length : 0,
+#                uvs: meshData.uvs ? meshData.uvs.length : 0,
+#                colors: meshData.colors ? meshData.colors.length : 0
+#            });
+#            
+#            // Validate mesh data
+#            if (!meshData.vertices || meshData.vertices.length === 0) {
+#                console.error('No vertex data available');
+#                document.getElementById('loading').innerHTML = 'Error: No vertex data found in model';
+#                return;
+#            }
+#            
+#            if (meshData.vertices && meshData.vertices.length > 0) {
+#                console.log('Creating geometry from mesh data...');
+#                console.log('Vertices count:', meshData.vertices.length);
+#                console.log('Faces count:', meshData.faces ? meshData.faces.length : 0);
+#                
+#                // Create geometry from mesh data
+#                const geometry = new THREE.BufferGeometry();
+#                
+#                // Set vertices
+#                const vertices = new Float32Array(meshData.vertices.flat());
+#                geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+#                console.log('Vertices set:', vertices.length / 3, 'vertices');
+#                
+#                // Handle faces (convert to triangles if needed)
+#                let triangles = [];
+#                if (meshData.faces && meshData.faces.length > 0) {
+#                    console.log('Processing', meshData.faces.length, 'faces...');
+#                    for (let face of meshData.faces) {
+#                        if (face.length === 3) {
+#                            triangles.push(face[0], face[1], face[2]);
+#                        } else if (face.length === 4) {
+#                            // Convert quad to two triangles
+#                            triangles.push(face[0], face[1], face[2]);
+#                            triangles.push(face[0], face[2], face[3]);
+#                        }
+#                    }
+#                    geometry.setIndex(triangles);
+#                    console.log('Faces processed:', triangles.length / 3, 'triangles');
+#                } else {
+#                    console.log('No faces data available, creating non-indexed geometry');
+#                }
+#                
+#                // Set UV coordinates if available, or generate basic UVs
+#                if (meshData.uvs && meshData.uvs.length > 0) {
+#                    const uvs = new Float32Array(meshData.uvs.flat());
+#                    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+#                    console.log('UV coordinates set:', uvs.length / 2, 'UV pairs');
+#                } else {
+#                    console.log('No UV coordinates available, generating basic UVs');
+#                    // Generate basic UV coordinates based on vertex positions
+#                    const positionAttribute = geometry.getAttribute('position');
+#                    const uvCount = positionAttribute.count;
+#                    const uvs = new Float32Array(uvCount * 2);
+#                    
+#                    for (let i = 0; i < uvCount; i++) {
+#                        const x = positionAttribute.getX(i);
+#                        const y = positionAttribute.getY(i);
+#                        const z = positionAttribute.getZ(i);
+#                        
+#                        // Simple planar mapping based on X and Z coordinates
+#                        const u = (x - geometry.boundingBox.min.x) / (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+#                        const v = (z - geometry.boundingBox.min.z) / (geometry.boundingBox.max.z - geometry.boundingBox.min.z);
+#                        
+#                        uvs[i * 2] = isNaN(u) ? 0 : u;
+#                        uvs[i * 2 + 1] = isNaN(v) ? 0 : v;
+#                    }
+#                    
+#                    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+#                    console.log('Generated UV coordinates:', uvs.length / 2, 'UV pairs');
+#                }
+#                
+#                // Compute normals if not present
+#                if (!geometry.attributes.normal) {
+#                    geometry.computeVertexNormals();
+#                    console.log('Computed vertex normals');
+#                }
+#                
+#                // Compute bounding box for UV generation
+#                geometry.computeBoundingBox();
+#                
+#                // Create material (use first available material or default)
+#                const materialIndex = 0;
+#                let material = materials[materialIndex];
+#                
+#                // If no material found, create a default one
+#                if (!material) {
+#                    material = new THREE.MeshStandardMaterial({
+#                        color: 0x888888,
+#                        side: THREE.DoubleSide
+#                    });
+#                    console.log('No material found, using default');
+#                }
+#                
+#                // If material exists but has no texture, try to apply any available texture
+#                if (material && !material.map && Object.keys(textures).length > 0) {
+#                    const firstTexture = Object.values(textures)[0];
+#                    const texture = textureLoader.load(firstTexture);
+#                    texture.colorSpace = THREE.SRGBColorSpace;
+#                    material.map = texture;
+#                    console.log('Applied fallback texture to material');
+#                }
+#                
+#                // Debug material
+#                console.log('Using material:', material);
+#                console.log('Material properties:', {
+#                    name: material.name,
+#                    map: material.map ? 'texture loaded' : 'no texture',
+#                    color: material.color,
+#                    side: material.side
+#                });
+#                
+#                // Create mesh
+#                const mesh = new THREE.Mesh(geometry, material);
+#                console.log('Mesh created with geometry:', geometry);
+#                console.log('Mesh bounding box:', geometry.boundingBox);
+#                console.log('Mesh vertices count:', geometry.attributes.position.count);
+#                
+#                model.add(mesh);
+#                console.log('Mesh added to model group');
+#            } else {
+#                // Fallback: create a simple box
+#                const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
+#                const material = new THREE.MeshStandardMaterial({ color: 0x888888 });
+#                const mesh = new THREE.Mesh(boxGeometry, material);
+#                model.add(mesh);
+#            }
+#            
+#            scene.add(model);
+#            
+#            // Center and scale the model
+#            const box = new THREE.Box3().setFromObject(model);
+#            const center = box.getCenter(new THREE.Vector3());
+#            const size = box.getSize(new THREE.Vector3());
+#            const maxDim = Math.max(size.x, size.y, size.z);
+#            const scale = 5 / maxDim;
+#            
+#            console.log('Model bounds:', {
+#                center: center,
+#                size: size,
+#                maxDimension: maxDim,
+#                scale: scale
+#            });
+#            
+#            model.scale.set(scale, scale, scale);
+#            model.position.sub(center.multiplyScalar(scale));
+#            
+#            console.log('Model positioned at:', model.position);
+#            console.log('Model scale:', model.scale);
+#            
+#            // Position camera
+#            camera.position.set(0, 2, 8);
+#            camera.lookAt(0, 0, 0);
+#            controls.update();
+#            
+#            console.log('Camera positioned at:', camera.position);
+#            console.log('Camera looking at:', new THREE.Vector3(0, 0, 0));
+#            
+#            // Hide loading message
+#            document.getElementById('loading').style.display = 'none';
+#            console.log('Loading message hidden, model should be visible');
+#            
+#            // Animation loop
+#            function animate() {
+#                requestAnimationFrame(animate);
+#                controls.update();
+#                renderer.render(scene, camera);
+#            }
+#            animate();
+#            console.log('Animation loop started');
+#            
+#            // Handle resize
+#            window.addEventListener('resize', function() {
+#                camera.aspect = window.innerWidth / {height};
+#                camera.updateProjectionMatrix();
+#                renderer.setSize(window.innerWidth, {height});
+#            });
+#            
+#            }} catch (error) {{
+#                console.error('Error in Three.js viewer:', error);
+#                document.getElementById('loading').innerHTML = 'Error loading model: ' + error.message;
+#            }}
+#            }} catch (error) {{
+#                console.error('Error in module import or script:', error);
+#                document.getElementById('loading').innerHTML = 'Error loading script: ' + error.message;
+#            }}
+#        </script>
+#    </body>
+#    </html>
+#    """
+#    
+#    return viewer_html
+
+def create_simple_textured_viewer(gltf_info, height=600):
+    """Create a simple Three.js viewer with texture support."""
     
-    model_folder = gltf_info['model_folder']
+    # Prepare mesh data for JavaScript
+    mesh_data_js = {
+        'vertices': gltf_info['vertices'].tolist() if len(gltf_info['vertices']) > 0 else [],
+        'faces': gltf_info['faces'].tolist() if len(gltf_info['faces']) > 0 else [],
+        'uvs': gltf_info['uvs'].tolist() if len(gltf_info['uvs']) > 0 else [],
+        'colors': gltf_info['colors'].tolist() if len(gltf_info['colors']) > 0 else []
+    }
     
-    # Get the GLTF file path relative to the model folder
-    gltf_file_name = "scene.gltf"  # Default name
-    if os.path.exists(os.path.join(model_folder, "scene.gltf")):
-        gltf_file_name = "scene.gltf"
-    elif os.path.exists(os.path.join(model_folder, "scene.glb")):
-        gltf_file_name = "scene.glb"
+    # Convert to JSON string safely
+    mesh_data_json = json.dumps(mesh_data_js)
     
-    # Create a data URL for the GLTF file
-    gltf_path = os.path.join(model_folder, gltf_file_name)
-    with open(gltf_path, 'rb') as f:
-        gltf_data_bytes = f.read()
-    
-    gltf_base64 = base64.b64encode(gltf_data_bytes).decode('utf-8')
-    gltf_data_url = f"data:model/gltf-binary;base64,{gltf_base64}"
+    # Find texture data
+    texture_data = None
+    if gltf_info['textures']:
+        texture_data = list(gltf_info['textures'].values())[0]  # Use first texture
     
     viewer_html = f"""
     <!DOCTYPE html>
@@ -494,22 +963,12 @@ def create_threejs_viewer_with_textures(gltf_info, height=600):
                 font-size: 12px;
                 z-index: 1000;
             }}
-            #loading {{
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                color: white;
-                font-size: 18px;
-                z-index: 1001;
-            }}
         </style>
     </head>
     <body>
         <div id="controls">
             🖱️ Left-click: Rotate | Right-click: Pan | Scroll: Zoom
         </div>
-        <div id="loading">Loading 3D model...</div>
         <div id="canvas"></div>
         
         <script type="importmap">
@@ -524,7 +983,6 @@ def create_threejs_viewer_with_textures(gltf_info, height=600):
         <script type="module">
             import * as THREE from 'three';
             import {{ OrbitControls }} from 'three/addons/controls/OrbitControls.js';
-            import {{ GLTFLoader }} from 'three/addons/loaders/GLTFLoader.js';
             
             // Scene setup
             const scene = new THREE.Scene();
@@ -533,212 +991,94 @@ def create_threejs_viewer_with_textures(gltf_info, height=600):
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / {height}, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({{ antialias: true }});
             renderer.setSize(window.innerWidth, {height});
-            renderer.outputColorSpace = THREE.SRGBColorSpace;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.0;
             document.getElementById('canvas').appendChild(renderer.domElement);
             
-            // Lighting setup for PBR materials
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            // Simple lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
             directionalLight.position.set(5, 5, 5);
-            directionalLight.castShadow = true;
             scene.add(directionalLight);
-            
-            const hemisphereLight = new THREE.HemisphereLight(0x87CEEB, 0x362d1d, 0.3);
-            scene.add(hemisphereLight);
             
             // Controls
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-            controls.enableZoom = true;
-            controls.enablePan = true;
-            controls.enableRotate = true;
             
-            // Load textures
-            const textures = {json.dumps(gltf_info['textures'])};
-            const textureLoader = new THREE.TextureLoader();
+            // Load mesh data
+            const meshData = {mesh_data_json};
             
-            // Create materials
-            const materialsData = {json.dumps(gltf_info['materials'])};
-            const materials = {{}};
+            console.log('Mesh data:', meshData.vertices.length, 'vertices,', meshData.faces.length, 'faces');
             
-            // Create Three.js materials from the material data
-            for (const [key, matData] of Object.entries(materialsData)) {{
-                const material = new THREE.MeshStandardMaterial({{
-                    name: matData.name || `material_${{key}}`,
-                    side: matData.doubleSided ? THREE.DoubleSide : THREE.FrontSide
-                }});
-                
-                // Handle PBR properties
-                if (matData.baseColorFactor) {{
-                    material.color.setRGB(
-                        matData.baseColorFactor[0],
-                        matData.baseColorFactor[1], 
-                        matData.baseColorFactor[2]
-                    );
-                    if (matData.baseColorFactor.length > 3) {{
-                        material.opacity = matData.baseColorFactor[3];
-                        material.transparent = matData.baseColorFactor[3] < 1.0;
-                    }}
+            // Create geometry
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(meshData.vertices.flat(), 3));
+            
+            // Handle faces
+            let triangles = [];
+            for (let face of meshData.faces) {{
+                if (face.length === 3) {{
+                    triangles.push(face[0], face[1], face[2]);
+                }} else if (face.length === 4) {{
+                    triangles.push(face[0], face[1], face[2]);
+                    triangles.push(face[0], face[2], face[3]);
                 }}
-                
-                // Handle textures
-                if (matData.baseColorTexture) {{
-                    const texture = textureLoader.load(matData.baseColorTexture);
-                    texture.colorSpace = THREE.SRGBColorSpace;
-                    material.map = texture;
-                }}
-                
-                if (matData.diffuseTexture) {{
-                    const texture = textureLoader.load(matData.diffuseTexture);
-                    texture.colorSpace = THREE.SRGBColorSpace;
-                    material.map = texture;
-                }}
-                
-                materials[key] = material;
             }}
+            geometry.setIndex(triangles);
             
-            // Debug materials and textures
-            console.log('Available textures:', Object.keys(textures));
-            console.log('Available materials:', Object.keys(materials));
-            if (Object.keys(materials).length > 0) {{
-                console.log('First material:', materials[0]);
-            }}
-            
-            // Load model using trimesh data (more reliable)
-            const model = new THREE.Group();
-            
-            // Get mesh data from trimesh (passed from Python)
-            const meshData = {json.dumps({
-                'vertices': gltf_info['vertices'].tolist() if len(gltf_info['vertices']) > 0 else [],
-                'faces': gltf_info['faces'].tolist() if len(gltf_info['faces']) > 0 else [],
-                'uvs': gltf_info['uvs'].tolist() if len(gltf_info['uvs']) > 0 else [],
-                'colors': gltf_info['colors'].tolist() if len(gltf_info['colors']) > 0 else []
-            })};
-            
-            // Debug mesh data
-            console.log('Mesh data loaded:', {{
-                vertices: meshData.vertices.length,
-                faces: meshData.faces.length,
-                uvs: meshData.uvs.length,
-                colors: meshData.colors.length
-            }});
-            
-            if (meshData.vertices && meshData.vertices.length > 0) {{
-                console.log('Creating geometry from mesh data...');
-                console.log('Vertices count:', meshData.vertices.length);
-                console.log('Faces count:', meshData.faces ? meshData.faces.length : 0);
+            // Generate UV coordinates if needed
+            if (meshData.uvs.length === 0) {{
+                console.log('Generating UV coordinates...');
+                const positionAttribute = geometry.getAttribute('position');
+                const uvCount = positionAttribute.count;
+                const uvs = new Float32Array(uvCount * 2);
                 
-                // Create geometry from mesh data
-                const geometry = new THREE.BufferGeometry();
-                
-                // Set vertices
-                const vertices = new Float32Array(meshData.vertices.flat());
-                geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-                console.log('Vertices set:', vertices.length / 3, 'vertices');
-                
-                // Handle faces (convert to triangles if needed)
-                let triangles = [];
-                if (meshData.faces && meshData.faces.length > 0) {{
-                    console.log('Processing', meshData.faces.length, 'faces...');
-                    for (let face of meshData.faces) {{
-                        if (face.length === 3) {{
-                            triangles.push(face[0], face[1], face[2]);
-                        }} else if (face.length === 4) {{
-                            // Convert quad to two triangles
-                            triangles.push(face[0], face[1], face[2]);
-                            triangles.push(face[0], face[2], face[3]);
-                        }}
-                    }}
-                    geometry.setIndex(triangles);
-                    console.log('Faces processed:', triangles.length / 3, 'triangles');
-                }} else {{
-                    console.log('No faces data available, creating non-indexed geometry');
+                for (let i = 0; i < uvCount; i++) {{
+                    const x = positionAttribute.getX(i);
+                    const z = positionAttribute.getZ(i);
+                    uvs[i * 2] = (x + 100) / 200;  // Simple normalization
+                    uvs[i * 2 + 1] = (z + 100) / 200;
                 }}
-                
-                // Set UV coordinates if available
-                if (meshData.uvs && meshData.uvs.length > 0) {{
-                    const uvs = new Float32Array(meshData.uvs.flat());
-                    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-                    console.log('UV coordinates set:', uvs.length / 2, 'UV pairs');
-                }} else {{
-                    console.log('No UV coordinates available');
-                }}
-                
-                // Compute normals if not present
-                if (!geometry.attributes.normal) {{
-                    geometry.computeVertexNormals();
-                    console.log('Computed vertex normals');
-                }}
-                
-                // Create material (use first available material or default)
-                const materialIndex = 0;
-                const material = materials[materialIndex] || new THREE.MeshStandardMaterial({{
-                    color: 0x888888,
-                    side: THREE.DoubleSide
-                }});
-                
-                // Debug material
-                console.log('Using material:', material);
-                console.log('Material properties:', {{
-                    name: material.name,
-                    map: material.map ? 'texture loaded' : 'no texture',
-                    color: material.color,
-                    side: material.side
-                }});
-                
-                // Create mesh
-                const mesh = new THREE.Mesh(geometry, material);
-                console.log('Mesh created with geometry:', geometry);
-                console.log('Mesh bounding box:', geometry.boundingBox);
-                console.log('Mesh vertices count:', geometry.attributes.position.count);
-                
-                model.add(mesh);
-                console.log('Mesh added to model group');
+                geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
             }} else {{
-                // Fallback: create a simple box
-                const boxGeometry = new THREE.BoxGeometry(1, 1, 1);
-                const material = new THREE.MeshStandardMaterial({{ color: 0x888888 }});
-                const mesh = new THREE.Mesh(boxGeometry, material);
-                model.add(mesh);
+                geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(meshData.uvs.flat()), 2));
             }}
             
-            scene.add(model);
+            // Compute normals
+            geometry.computeVertexNormals();
             
-            // Center and scale the model
-            const box = new THREE.Box3().setFromObject(model);
+            // Create material
+            let material;
+            if ('{texture_data}') {{
+                const textureLoader = new THREE.TextureLoader();
+                const texture = textureLoader.load('{texture_data}');
+                texture.colorSpace = THREE.SRGBColorSpace;
+                material = new THREE.MeshStandardMaterial({{ map: texture, side: THREE.DoubleSide }});
+                console.log('Using textured material');
+            }} else {{
+                material = new THREE.MeshStandardMaterial({{ color: 0xff6b6b, side: THREE.DoubleSide }});
+                console.log('Using solid color material');
+            }}
+            
+            // Create mesh
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+            
+            // Center and scale
+            const box = new THREE.Box3().setFromObject(mesh);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
             const scale = 5 / maxDim;
             
-            console.log('Model bounds:', {{
-                center: center,
-                size: size,
-                maxDimension: maxDim,
-                scale: scale
-            }});
-            
-            model.scale.set(scale, scale, scale);
-            model.position.sub(center.multiplyScalar(scale));
-            
-            console.log('Model positioned at:', model.position);
-            console.log('Model scale:', model.scale);
+            mesh.scale.set(scale, scale, scale);
+            mesh.position.sub(center.multiplyScalar(scale));
             
             // Position camera
             camera.position.set(0, 2, 8);
             camera.lookAt(0, 0, 0);
             controls.update();
-            
-            console.log('Camera positioned at:', camera.position);
-            console.log('Camera looking at:', new THREE.Vector3(0, 0, 0));
-            
-            // Hide loading message
-            document.getElementById('loading').style.display = 'none';
             
             // Animation loop
             function animate() {{
@@ -886,11 +1226,15 @@ if selected_file and os.path.exists(selected_file):
     
     if file_ext == '.gltf':
         # Load GLTF with proper texture support
+        print(f"Loading GLTF file: {selected_file}")
         gltf_info = load_gltf_with_textures(selected_file)
         if gltf_info:
+            print("GLTF loaded successfully, creating viewer...")
             # Create viewer with texture support
-            viewer_html = create_threejs_viewer_with_textures(gltf_info, height=600)
+            viewer_html = create_simple_textured_viewer(gltf_info, height=600)
             components.html(viewer_html, height=650)
+        else:
+            st.error("Failed to load GLTF file")
     else:
         # Load mesh information (needed for rendering)
         mesh_info = load_model_info(selected_file)
