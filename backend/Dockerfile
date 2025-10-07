@@ -30,13 +30,20 @@ RUN pip3 install --no-cache-dir --upgrade pip
 COPY pyproject.toml .
 
 # Install PyTorch with CUDA support first (for better caching)
+# Using stable compatible versions for CUDA 12.1
 RUN pip3 install --no-cache-dir \
-    torch==2.1.0 \
-    torchvision==0.16.0 \
-    torchaudio==2.1.0 \
+    torch==2.1.2 \
+    torchvision==0.16.2 \
+    torchaudio==2.1.2 \
     --index-url https://download.pytorch.org/whl/cu121
 
-# Install project dependencies using pyproject.toml
+# Install core dependencies first to avoid conflicts
+RUN pip3 install --no-cache-dir \
+    transformers==4.35.2 \
+    diffusers==0.24.0 \
+    accelerate==0.24.1
+
+# Install remaining project dependencies
 RUN pip3 install --no-cache-dir -e .
 
 # Copy application code
