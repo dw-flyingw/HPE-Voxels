@@ -6,8 +6,31 @@ This is the backend API server for the FLUX.1-dev text-to-image generation model
 
 The backend provides a FastAPI-based REST API for generating images from text prompts using the FLUX.1-dev model from Black Forest Labs.
 
+## Deployment Options
+
+### 🐳 Docker (Recommended)
+See [DOCKER.md](DOCKER.md) for complete Docker setup instructions.
+
+**Quick Start with Docker:**
+```bash
+cd backend
+chmod +x docker-up.sh
+./docker-up.sh
+```
+
+### 🐍 Native Python
+See instructions below for traditional Python virtual environment setup.
+
 ## Prerequisites
 
+### Docker Deployment
+- Docker and Docker Compose
+- NVIDIA Container Toolkit
+- Nvidia GPU with CUDA support
+- At least 24GB of free disk space for the model
+- Hugging Face account and API token
+
+### Native Deployment
 - Ubuntu Server (20.04 or later)
 - Nvidia H200 GPU (or other CUDA-capable GPU)
 - Nvidia drivers and CUDA toolkit installed

@@ -25,7 +25,7 @@
     {
       "id": 5,
       "name": "right kidney",
-      "prompt": "hyper photo-realistic human kidney tissue surface, medical photography, anatomically accurate renal capsule, reddish-brown color, smooth surface with subtle granular texture, natural vascular markings, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right kidney tissue surface, medical photography, anatomically accurate renal capsule, reddish-brown color, smooth surface with subtle granular texture, natural vascular markings, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 6,
@@ -40,12 +40,12 @@
     {
       "id": 8,
       "name": "right adrenal gland",
-      "prompt": "hyper photo-realistic human adrenal gland surface, medical photography, anatomically accurate adrenal tissue, yellowish-tan color, smooth capsular surface, natural glandular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right adrenal gland surface, medical photography, anatomically accurate adrenal tissue, yellowish-tan color, smooth capsular surface, natural glandular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 9,
       "name": "left adrenal gland",
-      "prompt": "hyper photo-realistic human adrenal gland surface, medical photography, anatomically accurate adrenal tissue, yellowish-tan color, smooth capsular surface, natural glandular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left adrenal gland surface, medical photography, anatomically accurate adrenal tissue, yellowish-tan color, smooth capsular surface, natural glandular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 10,
@@ -70,7 +70,7 @@
     {
       "id": 14,
       "name": "left kidney",
-      "prompt": "hyper photo-realistic human kidney tissue surface, medical photography, anatomically accurate renal capsule, reddish-brown color, smooth surface with subtle granular texture, natural vascular markings, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left kidney tissue surface, medical photography, anatomically accurate renal capsule, reddish-brown color, smooth surface with subtle granular texture, natural vascular markings, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 15,
@@ -120,27 +120,27 @@
     {
       "id": 28,
       "name": "left lung upper lobe",
-      "prompt": "hyper photo-realistic human lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 29,
       "name": "left lung lower lobe",
-      "prompt": "hyper photo-realistic human lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 30,
       "name": "right lung upper lobe",
-      "prompt": "hyper photo-realistic human lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 31,
       "name": "right lung middle lobe",
-      "prompt": "hyper photo-realistic human lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 32,
       "name": "right lung lower lobe",
-      "prompt": "hyper photo-realistic human lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right lung tissue surface, medical photography, anatomically accurate pulmonary parenchyma, pink to grayish color, spongy texture with alveolar patterns, natural pleural surface, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 33,
@@ -270,197 +270,197 @@
     {
       "id": 58,
       "name": "left iliac artery",
-      "prompt": "hyper photo-realistic human iliac artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular lumen, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left iliac artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular lumen, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 59,
       "name": "right iliac artery",
-      "prompt": "hyper photo-realistic human iliac artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular lumen, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right iliac artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular lumen, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 60,
       "name": "left iliac vena",
-      "prompt": "hyper photo-realistic human iliac vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left iliac vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 61,
       "name": "right iliac vena",
-      "prompt": "hyper photo-realistic human iliac vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right iliac vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 62,
       "name": "colon",
-      "prompt": "hyper photo-realistic human colon tissue surface, medical photography, anatomically accurate colonic mucosa with haustra, pink to reddish color, segmented texture with taeniae coli, natural mucosal folds, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human colon tissue surface, medical photography, anatomically accurate colonic mucosa, rich deep pink-red coloration with high saturation, glossy wet mucous surface with specular highlights, complex organic folds and haustra segments, intricate surface irregularities and vascular patterns, moist mucous membrane appearance, natural mucosal texture with fine surface details, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 63,
       "name": "left rib 1",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 64,
       "name": "left rib 2",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 65,
       "name": "left rib 3",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 66,
       "name": "left rib 4",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 67,
       "name": "left rib 5",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 68,
       "name": "left rib 6",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 69,
       "name": "left rib 7",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 70,
       "name": "left rib 8",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 71,
       "name": "left rib 9",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 72,
       "name": "left rib 10",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 73,
       "name": "left rib 11",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 74,
       "name": "left rib 12",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 75,
       "name": "right rib 1",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 76,
       "name": "right rib 2",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 77,
       "name": "right rib 3",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 78,
       "name": "right rib 4",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 79,
       "name": "right rib 5",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 80,
       "name": "right rib 6",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 81,
       "name": "right rib 7",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 82,
       "name": "right rib 8",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 83,
       "name": "right rib 9",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 84,
       "name": "right rib 10",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 85,
       "name": "right rib 11",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 86,
       "name": "right rib 12",
-      "prompt": "hyper photo-realistic human rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right rib bone surface, medical photography, anatomically accurate bone texture, white to beige color, smooth cortical surface with subtle periosteal texture, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 87,
       "name": "left humerus",
-      "prompt": "hyper photo-realistic human humerus bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left humerus bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 88,
       "name": "right humerus",
-      "prompt": "hyper photo-realistic human humerus bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right humerus bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 89,
       "name": "left scapula",
-      "prompt": "hyper photo-realistic human scapula bone surface, medical photography, anatomically accurate shoulder blade texture, white to beige color, smooth to ridged cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left scapula bone surface, medical photography, anatomically accurate shoulder blade texture, white to beige color, smooth to ridged cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 90,
       "name": "right scapula",
-      "prompt": "hyper photo-realistic human scapula bone surface, medical photography, anatomically accurate shoulder blade texture, white to beige color, smooth to ridged cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right scapula bone surface, medical photography, anatomically accurate shoulder blade texture, white to beige color, smooth to ridged cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 91,
       "name": "left clavicula",
-      "prompt": "hyper photo-realistic human clavicle bone surface, medical photography, anatomically accurate collarbone texture, white to beige color, smooth cortical surface with subtle curves, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left clavicle bone surface, medical photography, anatomically accurate collarbone texture, white to beige color, smooth cortical surface with subtle curves, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 92,
       "name": "right clavicula",
-      "prompt": "hyper photo-realistic human clavicle bone surface, medical photography, anatomically accurate collarbone texture, white to beige color, smooth cortical surface with subtle curves, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right clavicle bone surface, medical photography, anatomically accurate collarbone texture, white to beige color, smooth cortical surface with subtle curves, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 93,
       "name": "left femur",
-      "prompt": "hyper photo-realistic human femur bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left femur bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 94,
       "name": "right femur",
-      "prompt": "hyper photo-realistic human femur bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right femur bone surface, medical photography, anatomically accurate long bone texture, white to beige color, smooth cortical surface, natural bone appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 95,
       "name": "left hip",
-      "prompt": "hyper photo-realistic human hip bone surface, medical photography, anatomically accurate pelvic bone texture, white to beige color, smooth cortical surface with trabecular patterns, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left hip bone surface, medical photography, anatomically accurate isolated hip bone texture, white to beige color, smooth cortical surface with trabecular patterns, single hip bone only, no pelvic girdle or other bones, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 96,
       "name": "right hip",
-      "prompt": "hyper photo-realistic human hip bone surface, medical photography, anatomically accurate pelvic bone texture, white to beige color, smooth cortical surface with trabecular patterns, natural bone structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right hip bone surface, medical photography, anatomically accurate isolated hip bone texture, white to beige color, smooth cortical surface with trabecular patterns, single hip bone only, no pelvic girdle or other bones, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 97,
@@ -470,57 +470,57 @@
     {
       "id": 98,
       "name": "left gluteus maximus",
-      "prompt": "hyper photo-realistic human gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 99,
       "name": "right gluteus maximus",
-      "prompt": "hyper photo-realistic human gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 100,
       "name": "left gluteus medius",
-      "prompt": "hyper photo-realistic human gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 101,
       "name": "right gluteus medius",
-      "prompt": "hyper photo-realistic human gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 102,
       "name": "left gluteus minimus",
-      "prompt": "hyper photo-realistic human gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 103,
       "name": "right gluteus minimus",
-      "prompt": "hyper photo-realistic human gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right gluteus muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 104,
       "name": "left autochthon",
-      "prompt": "hyper photo-realistic human paraspinal muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left paraspinal muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 105,
       "name": "right autochthon",
-      "prompt": "hyper photo-realistic human paraspinal muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right paraspinal muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 106,
       "name": "left iliopsoas",
-      "prompt": "hyper photo-realistic human iliopsoas muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left iliopsoas muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 107,
       "name": "right iliopsoas",
-      "prompt": "hyper photo-realistic human iliopsoas muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right iliopsoas muscle tissue, medical photography, anatomically accurate skeletal muscle, deep red color, striated muscle fiber texture, natural fascial covering, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 108,
       "name": "left atrial appendage",
-      "prompt": "hyper photo-realistic human heart muscle surface, medical photography, anatomically accurate cardiac tissue, deep red color, striated muscle texture with coronary vessels, natural myocardial fibers, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left heart muscle surface, medical photography, anatomically accurate cardiac tissue, deep red color, striated muscle texture with coronary vessels, natural myocardial fibers, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 109,
@@ -530,22 +530,22 @@
     {
       "id": 110,
       "name": "left brachiocephalic vein",
-      "prompt": "hyper photo-realistic human brachiocephalic vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous lumen, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left brachiocephalic vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous lumen, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 111,
       "name": "right brachiocephalic vein",
-      "prompt": "hyper photo-realistic human brachiocephalic vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous lumen, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right brachiocephalic vein surface, medical photography, anatomically accurate venous wall, dark red to bluish color, smooth surface texture, natural venous lumen, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 112,
       "name": "left common carotid artery",
-      "prompt": "hyper photo-realistic human carotid artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural intimal surface, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left carotid artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural intimal surface, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 113,
       "name": "right common carotid artery",
-      "prompt": "hyper photo-realistic human carotid artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural intimal surface, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right carotid artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural intimal surface, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 114,
@@ -560,12 +560,12 @@
     {
       "id": 116,
       "name": "left kidney cyst",
-      "prompt": "hyper photo-realistic human cyst surface, medical photography, anatomically accurate cystic wall, smooth translucent appearance, natural fluid-filled structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left cyst surface, medical photography, anatomically accurate cystic wall, smooth translucent appearance, natural fluid-filled structure, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 117,
       "name": "right kidney cyst",
-      "prompt": "hyper photo-realistic human cyst surface, medical photography, anatomically accurate cystic wall, smooth translucent appearance, natural fluid-filled structure, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right cyst surface, medical photography, anatomically accurate cystic wall, smooth translucent appearance, natural fluid-filled structure, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 118,
@@ -595,12 +595,12 @@
     {
       "id": 123,
       "name": "left subclavian artery",
-      "prompt": "hyper photo-realistic human subclavian artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human left subclavian artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 124,
       "name": "right subclavian artery",
-      "prompt": "hyper photo-realistic human subclavian artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human right subclavian artery surface, medical photography, anatomically accurate arterial wall, smooth red color, elastic tissue texture, natural vascular appearance, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 125,
@@ -669,4 +669,3 @@
     }
   ]
 }
-

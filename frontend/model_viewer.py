@@ -375,6 +375,399 @@ def get_available_model_folders():
     
     return sorted(available_folders)
 
+def render_multi_model_viewer(model_folders, height=600):
+    """Render multiple GLB/GLTF files together in their correct spatial positions using Three.js."""
+    
+    try:
+        # Load all models and collect their data with textures
+        models_data = []
+        all_textures = {}
+        texture_counter = 0
+        
+        for folder in model_folders:
+            # Find model file in folder
+            model_file = None
+            scene_gltf_path = os.path.join(folder, "scene.gltf")
+            scene_glb_path = os.path.join(folder, "scene.glb")
+            
+            if os.path.exists(scene_gltf_path):
+                model_file = scene_gltf_path
+            elif os.path.exists(scene_glb_path):
+                model_file = scene_glb_path
+            
+            if not model_file:
+                continue
+                
+            model_name = os.path.basename(folder)
+            
+            # Load GLTF with textures if it's a GLTF file
+            if model_file.endswith('.gltf'):
+                gltf_info = load_gltf_with_textures(model_file)
+                if gltf_info:
+                    # Add textures to global texture collection
+                    model_textures = {}
+                    for tex_key, tex_data in gltf_info['textures'].items():
+                        global_tex_key = f"{model_name}_{tex_key}"
+                        all_textures[global_tex_key] = tex_data
+                        model_textures[tex_key] = global_tex_key
+                    
+                    models_data.append({
+                        'name': model_name,
+                        'vertices': gltf_info['vertices'],
+                        'faces': gltf_info['faces'],
+                        'uvs': gltf_info['uvs'],
+                        'colors': gltf_info['colors'],
+                        'textures': model_textures,
+                        'materials': gltf_info['materials'],
+                        'has_textures': len(gltf_info['textures']) > 0
+                    })
+                    continue
+            
+            # Fallback: Load basic mesh data for non-GLTF files
+            scene_or_mesh = trimesh.load(model_file)
+            
+            # Extract vertices, faces, and colors
+            if hasattr(scene_or_mesh, 'geometry'):  # Scene object
+                vertices_list = []
+                faces_list = []
+                colors_list = []
+                uvs_list = []
+                face_offset = 0
+                
+                for geometry_name, geometry in scene_or_mesh.geometry.items():
+                    if hasattr(geometry, 'vertices') and hasattr(geometry, 'faces'):
+                        vertices_list.append(geometry.vertices)
+                        faces_list.append(geometry.faces + face_offset)
+                        
+                        if hasattr(geometry.visual, 'vertex_colors') and geometry.visual.vertex_colors is not None:
+                            colors_list.append(geometry.visual.vertex_colors)
+                        elif hasattr(geometry.visual, 'face_colors') and geometry.visual.face_colors is not None:
+                            colors_list.append(geometry.visual.face_colors)
+                        
+                        # Get UV coordinates if available
+                        if hasattr(geometry.visual, 'uv') and geometry.visual.uv is not None:
+                            uvs_list.append(geometry.visual.uv)
+                        
+                        face_offset += len(geometry.vertices)
+                
+                if vertices_list:
+                    vertices = np.vstack(vertices_list)
+                    faces = np.vstack(faces_list)
+                    colors = np.vstack(colors_list) if colors_list else None
+                    uvs = np.vstack(uvs_list) if uvs_list else np.array([])
+                else:
+                    continue
+            else:  # Single Mesh object
+                vertices = scene_or_mesh.vertices
+                faces = scene_or_mesh.faces
+                
+                colors = None
+                if hasattr(scene_or_mesh.visual, 'vertex_colors') and scene_or_mesh.visual.vertex_colors is not None:
+                    colors = scene_or_mesh.visual.vertex_colors
+                elif hasattr(scene_or_mesh.visual, 'face_colors') and scene_or_mesh.visual.face_colors is not None:
+                    colors = scene_or_mesh.visual.face_colors
+                
+                # Get UV coordinates if available
+                uvs = np.array([])
+                if hasattr(scene_or_mesh.visual, 'uv') and scene_or_mesh.visual.uv is not None:
+                    uvs = scene_or_mesh.visual.uv
+            
+            models_data.append({
+                'name': model_name,
+                'vertices': vertices,
+                'faces': faces,
+                'uvs': uvs,
+                'colors': colors,
+                'textures': {},
+                'materials': {},
+                'has_textures': False
+            })
+        
+        if not models_data:
+            st.error("No valid models found to display")
+            return
+        
+        # Convert models data to JSON
+        models_json = json.dumps([{
+            'name': model['name'],
+            'vertices': model['vertices'].tolist() if hasattr(model['vertices'], 'tolist') else model['vertices'],
+            'faces': model['faces'].tolist() if hasattr(model['faces'], 'tolist') else model['faces'],
+            'uvs': model['uvs'].tolist() if hasattr(model['uvs'], 'tolist') and len(model['uvs']) > 0 else (model['uvs'] if len(model['uvs']) > 0 else []),
+            'colors': model['colors'].tolist() if hasattr(model['colors'], 'tolist') and model['colors'] is not None else model['colors'],
+            'textures': model['textures'],
+            'materials': model['materials'],
+            'has_textures': model['has_textures']
+        } for model in models_data])
+        
+        # Convert all textures to JSON
+        textures_json = json.dumps(all_textures)
+        
+        # Create Three.js viewer HTML for multiple models
+        viewer_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ margin: 0; padding: 0; overflow: hidden; }}
+                #canvas {{ width: 100%; height: {height}px; }}
+                #controls {{
+                    position: absolute;
+                    top: 10px;
+                    left: 10px;
+                    background: rgba(0,0,0,0.7);
+                    color: white;
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-family: Arial, sans-serif;
+                    font-size: 12px;
+                    z-index: 1000;
+                }}
+                #model-list {{
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    background: rgba(0,0,0,0.7);
+                    color: white;
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-family: Arial, sans-serif;
+                    font-size: 11px;
+                    z-index: 1000;
+                    max-width: 200px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div id="controls">
+                🖱️ Left-click: Rotate | Right-click: Pan | Scroll: Zoom<br/>
+                👁️ Viewing {len(models_data)} models together
+            </div>
+            <div id="model-list">
+                <strong>Models loaded:</strong><br/>
+                {' '.join([f"• {model['name']}<br/>" for model in models_data])}
+            </div>
+            <div id="canvas"></div>
+            
+            <script type="importmap">
+            {{
+                "imports": {{
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+                }}
+            }}
+            </script>
+            
+            <script type="module">
+                import * as THREE from 'three';
+                import {{ OrbitControls }} from 'three/addons/controls/OrbitControls.js';
+                
+                // Scene setup
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x000000);
+                
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / {height}, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({{ antialias: true }});
+                renderer.setSize(window.innerWidth, {height});
+                renderer.outputColorSpace = THREE.SRGBColorSpace;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.5;
+                document.getElementById('canvas').appendChild(renderer.domElement);
+                
+                // Enhanced lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+                scene.add(ambientLight);
+                
+                const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.0);
+                directionalLight1.position.set(5, 5, 5);
+                scene.add(directionalLight1);
+                
+                const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight2.position.set(-5, 5, -5);
+                scene.add(directionalLight2);
+                
+                const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.6);
+                directionalLight3.position.set(0, -5, 0);
+                scene.add(directionalLight3);
+                
+                const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
+                scene.add(hemisphereLight);
+                
+                // Controls
+                const controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.enableZoom = true;
+                controls.enablePan = true;
+                controls.enableRotate = true;
+                
+                // Load all models
+                const modelsData = {models_json};
+                const allTextures = {textures_json};
+                const allMeshes = [];
+                
+                console.log('Loading', modelsData.length, 'models...');
+                console.log('Available textures:', Object.keys(allTextures).length);
+                
+                // Create texture loader
+                const textureLoader = new THREE.TextureLoader();
+                
+                for (const modelData of modelsData) {{
+                    console.log('Processing model:', modelData.name);
+                    console.log('Model has textures:', modelData.has_textures);
+                    console.log('Model textures:', Object.keys(modelData.textures));
+                    
+                    const vertices = modelData.vertices;
+                    const faces = modelData.faces;
+                    const colors = modelData.colors;
+                    const uvs = modelData.uvs;
+                    
+                    // Create geometry
+                    const geometry = new THREE.BufferGeometry();
+                    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices.flat(), 3));
+                    
+                    // Handle faces
+                    let triangles = [];
+                    for (let face of faces) {{
+                        if (face.length === 3) {{
+                            triangles.push(face[0], face[1], face[2]);
+                        }} else if (face.length === 4) {{
+                            triangles.push(face[0], face[1], face[2]);
+                            triangles.push(face[0], face[2], face[3]);
+                        }}
+                    }}
+                    geometry.setIndex(triangles);
+                    
+                    // Handle UV coordinates
+                    if (uvs && uvs.length > 0) {{
+                        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs.flat(), 2));
+                        console.log('Set UV coordinates for', modelData.name);
+                    }} else {{
+                        // Generate basic UV coordinates
+                        geometry.computeBoundingBox();
+                        const positionAttribute = geometry.getAttribute('position');
+                        const uvCount = positionAttribute.count;
+                        const uvs = new Float32Array(uvCount * 2);
+                        
+                        for (let i = 0; i < uvCount; i++) {{
+                            const x = positionAttribute.getX(i);
+                            const y = positionAttribute.getY(i);
+                            const z = positionAttribute.getZ(i);
+                            
+                            // Spherical UV mapping
+                            const u = Math.atan2(z, x) / (2 * Math.PI) + 0.5;
+                            const v = (y - geometry.boundingBox.min.y) / (geometry.boundingBox.max.y - geometry.boundingBox.min.y);
+                            
+                            uvs[i * 2] = isNaN(u) ? 0 : u;
+                            uvs[i * 2 + 1] = isNaN(v) ? 0 : v;
+                        }}
+                        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+                        console.log('Generated UV coordinates for', modelData.name);
+                    }}
+                    
+                    // Compute normals
+                    geometry.computeVertexNormals();
+                    
+                    // Add colors if available
+                    if (colors && colors.length > 0) {{
+                        if (colors[0].length >= 3) {{
+                            const colorData = colors.map(c => c.slice(0, 3));
+                            const colorArray = new Float32Array(colorData.flat().map(c => c / 255.0));
+                            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colorArray, 3));
+                        }}
+                    }}
+                    
+                    // Create material with texture support
+                    const material = new THREE.MeshStandardMaterial({{ 
+                        vertexColors: colors && colors.length > 0,
+                        side: THREE.DoubleSide,
+                        color: 0xffffff,
+                        transparent: false,
+                        opacity: 1.0,
+                        depthWrite: true,
+                        depthTest: true,
+                        roughness: 0.3,
+                        metalness: 0.0,
+                        emissive: new THREE.Color(0x111111),
+                        emissiveIntensity: 0.1
+                    }});
+                    
+                    // Apply textures if available
+                    if (modelData.has_textures && Object.keys(modelData.textures).length > 0) {{
+                        // Find first available texture for this model
+                        const textureKey = Object.values(modelData.textures)[0];
+                        if (allTextures[textureKey]) {{
+                            const texture = textureLoader.load(allTextures[textureKey]);
+                            texture.colorSpace = THREE.SRGBColorSpace;
+                            texture.wrapS = THREE.RepeatWrapping;
+                            texture.wrapT = THREE.RepeatWrapping;
+                            material.map = texture;
+                            console.log('Applied texture to', modelData.name, ':', textureKey);
+                        }}
+                    }}
+                    
+                    // Create mesh - NO scaling or centering for individual models
+                    // They should maintain their original positions
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.name = modelData.name;
+                    scene.add(mesh);
+                    allMeshes.push(mesh);
+                    
+                    console.log('Added model:', modelData.name, 'with', vertices.length, 'vertices, texture:', !!material.map);
+                }}
+                
+                // Calculate overall bounding box for camera positioning
+                const overallBox = new THREE.Box3();
+                for (const mesh of allMeshes) {{
+                    const box = new THREE.Box3().setFromObject(mesh);
+                    overallBox.union(box);
+                }}
+                
+                const center = overallBox.getCenter(new THREE.Vector3());
+                const size = overallBox.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                
+                console.log('Overall scene bounds:', {{
+                    center: center,
+                    size: size,
+                    maxDim: maxDim
+                }});
+                
+                // Position camera to view all models
+                const distance = maxDim * 1.5;
+                camera.position.set(distance * 0.5, distance * 0.5, distance);
+                camera.lookAt(center);
+                controls.target.copy(center);
+                controls.update();
+                
+                console.log('Camera positioned at:', camera.position);
+                console.log('Camera looking at:', center);
+                
+                // Animation loop
+                function animate() {{
+                    requestAnimationFrame(animate);
+                    controls.update();
+                    renderer.render(scene, camera);
+                }}
+                animate();
+                
+                // Handle resize
+                window.addEventListener('resize', function() {{
+                    camera.aspect = window.innerWidth / {height};
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, {height});
+                }});
+            </script>
+        </body>
+        </html>
+        """
+        
+        components.html(viewer_html, height=height + 50)
+        
+    except Exception as e:
+        st.error(f"Error rendering multi-model viewer: {e}")
+        import traceback
+        st.text(traceback.format_exc())
+
 def extract_uvs_from_gltf(gltf_data, model_folder):
     """Extract UV coordinates from GLTF accessors."""
     try:
@@ -1283,29 +1676,45 @@ with st.sidebar:
     # Get available model folders
     available_folders = get_available_model_folders()
     
+    # View mode selection
+    view_mode = st.radio(
+        "View Mode:",
+        ["Single Model", "All Models Together"],
+        help="Choose to view a single model or all models in their correct spatial positions"
+    )
+    
     if available_folders:
-        # Create display names for folders (just the folder name)
-        folder_display_names = [os.path.basename(folder) for folder in available_folders]
-        folder_options = ["Select a model..."] + folder_display_names
-        
-        selected_folder_name = st.selectbox(
-            "Choose model:",
-            folder_options,
-            help="Select a model from the available model folders"
-        )
-        
-        if selected_folder_name != "Select a model...":
-            # Find the full path for the selected folder name
-            selected_folder = None
-            for folder in available_folders:
-                if os.path.basename(folder) == selected_folder_name:
-                    selected_folder = folder
-                    break
+        if view_mode == "Single Model":
+            # Create display names for folders (just the folder name)
+            folder_display_names = [os.path.basename(folder) for folder in available_folders]
+            folder_options = ["Select a model..."] + folder_display_names
+            
+            selected_folder_name = st.selectbox(
+                "Choose model:",
+                folder_options,
+                help="Select a model from the available model folders"
+            )
+            
+            if selected_folder_name != "Select a model...":
+                # Find the full path for the selected folder name
+                selected_folder = None
+                for folder in available_folders:
+                    if os.path.basename(folder) == selected_folder_name:
+                        selected_folder = folder
+                        break
+            else:
+                selected_folder = None
+            
+            view_all_models = False
         else:
+            # View all models together
             selected_folder = None
+            view_all_models = True
+            st.info(f"📊 Viewing all {len(available_folders)} models together in their correct spatial positions")
     else:
         st.warning("No model folders found in ./output/models/")
         selected_folder = None
+        view_all_models = False
     
     # Model loading from selected folder
     selected_file = None
@@ -1490,7 +1899,15 @@ with st.sidebar:
             st.caption("Expected formats: scene.glb, scene.gltf, or other 3D model files")
 
 # Main content
-if selected_file and os.path.exists(selected_file):
+if view_all_models and available_folders:
+    # View all models together
+    st.header("🌐 All Models - Spatial View")
+    st.markdown(f"Displaying **{len(available_folders)}** models in their correct spatial positions")
+    
+    # Render multi-model viewer
+    render_multi_model_viewer(available_folders, height=600)
+    
+elif selected_file and os.path.exists(selected_file):
     # Check if it's a GLTF file that should use texture loading
     file_ext = os.path.splitext(selected_file)[1].lower()
     
