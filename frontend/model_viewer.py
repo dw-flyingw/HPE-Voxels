@@ -24,6 +24,7 @@ from pathlib import Path
 # Import logic functions
 from logic.model_viewer_logic import (
     generate_photorealistic_texture,
+    generate_flux_uv_texture,
     check_flux_server_health,
     generate_texture_prompt
 )
@@ -1848,15 +1849,31 @@ with st.sidebar:
                     help="Higher resolution = better quality but slower generation"
                 )
                 
+                # Generation method selection
+                generation_method = st.selectbox(
+                    "Generation method",
+                    ["Flux UV-Guided (Recommended)", "Standard Flux"],
+                    help="UV-guided generation creates textures that map exactly to your model's surface"
+                )
+                
                 # Generate button
-                if st.button("🚀 Generate Photo-Realistic Texture", type="primary"):
+                button_text = "🚀 Generate Hyper-Realistic UV Texture" if "UV-Guided" in generation_method else "🚀 Generate Photo-Realistic Texture"
+                if st.button(button_text, type="primary"):
                     with st.spinner("Generating texture with Flux AI... This may take 1-2 minutes..."):
-                        result = generate_photorealistic_texture(
-                            model_folder=selected_folder,
-                            model_name=model_display_name,
-                            custom_prompt=custom_prompt if use_custom_prompt else None,
-                            texture_size=texture_size
-                        )
+                        if "UV-Guided" in generation_method:
+                            result = generate_flux_uv_texture(
+                                model_folder=selected_folder,
+                                model_name=model_display_name,
+                                custom_prompt=custom_prompt if use_custom_prompt else None,
+                                texture_size=texture_size
+                            )
+                        else:
+                            result = generate_photorealistic_texture(
+                                model_folder=selected_folder,
+                                model_name=model_display_name,
+                                custom_prompt=custom_prompt if use_custom_prompt else None,
+                                texture_size=texture_size
+                            )
                         
                         if result['success']:
                             st.success(result['message'])

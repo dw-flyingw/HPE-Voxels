@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from diffusers import FluxPipeline
 from dotenv import load_dotenv
 from PIL import Image
+import numpy as np
 
 # Load environment variables
 load_dotenv()
@@ -32,6 +33,19 @@ class GenerationRequest(BaseModel):
     guidance_scale: Optional[float] = Field(None, description="Guidance scale (default: 3.5)")
     num_inference_steps: Optional[int] = Field(None, description="Number of inference steps (default: 50)")
     max_sequence_length: Optional[int] = Field(None, description="Max sequence length (default: 512)")
+    seed: Optional[int] = Field(None, description="Random seed for reproducibility")
+    return_base64: Optional[bool] = Field(False, description="Return image as base64 string instead of PNG")
+
+
+class UVGuidedGenerationRequest(BaseModel):
+    """Request model for UV-guided image generation"""
+    prompt: str = Field(..., description="Text prompt for image generation")
+    control_image: str = Field(..., description="Base64 encoded UV layout image")
+    control_type: str = Field("uv_layout", description="Type of control guidance")
+    height: Optional[int] = Field(None, description="Image height (default: 1024)")
+    width: Optional[int] = Field(None, description="Image width (default: 1024)")
+    guidance_scale: Optional[float] = Field(None, description="Guidance scale (default: 3.5)")
+    num_inference_steps: Optional[int] = Field(None, description="Number of inference steps (default: 50)")
     seed: Optional[int] = Field(None, description="Random seed for reproducibility")
     return_base64: Optional[bool] = Field(False, description="Return image as base64 string instead of PNG")
 
@@ -115,6 +129,7 @@ async def root():
         "device": str(pipeline.device) if pipeline else "not loaded",
         "endpoints": {
             "generate": "/generate",
+            "generate_with_control": "/generate_with_control",
             "health": "/health",
             "docs": "/docs"
         }
@@ -205,6 +220,108 @@ async def generate_image(request: GenerationRequest):
     except Exception as e:
         print(f"Error generating image: {e}")
         raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
+
+
+@app.post("/generate_with_control")
+async def generate_image_with_control(request: UVGuidedGenerationRequest):
+    """Generate an image from a text prompt with UV layout control"""
+    if pipeline is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    
+    try:
+        # Get generation parameters with defaults from environment
+        height = request.height or int(os.getenv("FLUX_DEFAULT_HEIGHT", 1024))
+        width = request.width or int(os.getenv("FLUX_DEFAULT_WIDTH", 1024))
+        guidance_scale = request.guidance_scale or float(os.getenv("FLUX_DEFAULT_GUIDANCE_SCALE", 3.5))
+        num_steps = request.num_inference_steps or int(os.getenv("FLUX_DEFAULT_NUM_STEPS", 50))
+        
+        # Setup generator for reproducibility
+        generator = None
+        if request.seed is not None:
+            generator = torch.Generator(device="cpu").manual_seed(request.seed)
+        
+        print(f"Generating UV-guided image with prompt: '{request.prompt}'")
+        
+        # Decode control image
+        try:
+            control_img_data = base64.b64decode(request.control_image)
+            control_image = Image.open(io.BytesIO(control_img_data))
+            control_image = control_image.resize((width, height))
+            print(f"Control image loaded: {control_image.size}")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid control image: {str(e)}")
+        
+        # Enhanced prompt for UV-guided generation
+        enhanced_prompt = f"{request.prompt}, UV texture mapping, seamless texture, organic surface detail, medical photography quality, anatomically accurate"
+        
+        # Generate image with UV guidance
+        # For now, we'll use the standard generation but with enhanced prompts
+        # In a full implementation, you'd use ControlNet or similar for actual control
+        image = pipeline(
+            enhanced_prompt,
+            height=height,
+            width=width,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_steps,
+            generator=generator
+        ).images[0]
+        
+        # Post-process to better match UV layout
+        if request.control_type == "uv_layout":
+            # Blend the generated image with UV layout awareness
+            image_array = np.array(image)
+            control_array = np.array(control_image.convert('RGB'))
+            
+            # Create a mask from the control image (white areas)
+            control_gray = np.mean(control_array, axis=2)
+            uv_mask = (control_gray > 50).astype(np.float32)  # Areas where UV coordinates exist
+            
+            # Apply UV-aware blending
+            for i in range(3):
+                image_array[:, :, i] = (
+                    image_array[:, :, i] * uv_mask + 
+                    control_array[:, :, i] * (1 - uv_mask) * 0.1
+                )
+            
+            image = Image.fromarray(image_array.astype(np.uint8))
+        
+        metadata = {
+            "prompt": request.prompt,
+            "enhanced_prompt": enhanced_prompt,
+            "control_type": request.control_type,
+            "height": height,
+            "width": width,
+            "guidance_scale": guidance_scale,
+            "num_inference_steps": num_steps,
+            "seed": request.seed
+        }
+        
+        # Return as base64 or PNG
+        if request.return_base64:
+            # Convert to base64
+            buffered = io.BytesIO()
+            image.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+            
+            return GenerationResponse(
+                image_base64=img_str,
+                metadata=metadata
+            )
+        else:
+            # Return as PNG image
+            img_byte_arr = io.BytesIO()
+            image.save(img_byte_arr, format="PNG")
+            img_byte_arr.seek(0)
+            
+            return StreamingResponse(
+                img_byte_arr,
+                media_type="image/png",
+                headers={"X-Generation-Metadata": str(metadata)}
+            )
+            
+    except Exception as e:
+        print(f"Error generating UV-guided image: {e}")
+        raise HTTPException(status_code=500, detail=f"UV-guided generation failed: {str(e)}")
 
 
 if __name__ == "__main__":

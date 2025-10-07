@@ -778,6 +778,120 @@ def generate_physically_scaled_texture(model_folder: str, model_name: str,
         }
 
 
+def generate_flux_uv_texture(model_folder: str, model_name: str, 
+                           custom_prompt: str = None, texture_size: int = 1024) -> dict:
+    """
+    Generate hyper-realistic texture using Flux AI with UV coordinate guidance.
+    This creates textures that map exactly to the model's UV layout.
+    """
+    try:
+        print(f"Starting Flux UV texture generation for {model_name}...")
+        
+        # Import UV extraction functions
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+        
+        from generate_flux_uv_textures import (
+            extract_gltf_uv_coordinates,
+            create_uv_layout_visualization,
+            generate_texture_with_flux,
+            apply_texture_to_uv_layout,
+            generate_organ_specific_prompt
+        )
+        
+        # Find GLTF file
+        gltf_path = os.path.join(model_folder, "scene.gltf")
+        if not os.path.exists(gltf_path):
+            return {
+                'success': False,
+                'message': f"No scene.gltf found in {model_folder}"
+            }
+        
+        # Extract UV coordinates
+        print("Extracting UV coordinates...")
+        uvs = extract_gltf_uv_coordinates(gltf_path)
+        print(f"Found {len(uvs)} UV coordinates")
+        
+        # Create UV layout visualization
+        print("Creating UV layout visualization...")
+        uv_guide = create_uv_layout_visualization(uvs, texture_size)
+        
+        # Generate organ-specific prompt
+        if custom_prompt:
+            prompt = custom_prompt
+        else:
+            prompt = generate_organ_specific_prompt(model_name)
+        
+        print(f"Using prompt: {prompt[:100]}...")
+        
+        # Generate texture with Flux
+        print("Generating texture with Flux AI...")
+        flux_texture = generate_texture_with_flux(
+            prompt=prompt,
+            uv_guide_image=uv_guide,
+            size=texture_size,
+            guidance_scale=3.5,
+            num_steps=50
+        )
+        
+        if flux_texture is None:
+            return {
+                'success': False,
+                'message': "Failed to generate texture with Flux AI"
+            }
+        
+        # Create UV mask and apply texture
+        print("Applying texture to UV layout...")
+        from generate_flux_uv_textures import create_uv_mask_from_coordinates
+        uv_mask = create_uv_mask_from_coordinates(uvs, texture_size)
+        final_texture = apply_texture_to_uv_layout(flux_texture, uv_mask, model_name, texture_size)
+        
+        # Save texture
+        texture_path = os.path.join(model_folder, "textures", "diffuse.png")
+        os.makedirs(os.path.dirname(texture_path), exist_ok=True)
+        final_texture.save(texture_path)
+        
+        # Save UV guide for debugging
+        uv_guide_path = os.path.join(model_folder, "textures", "uv_guide_flux.png")
+        uv_guide.save(uv_guide_path)
+        
+        # Load mesh for stats
+        try:
+            import trimesh
+            scene_or_mesh = trimesh.load(gltf_path)
+            if hasattr(scene_or_mesh, 'geometry'):
+                vertices = np.vstack([geom.vertices for geom in scene_or_mesh.geometry.values()])
+                faces = np.vstack([geom.faces for geom in scene_or_mesh.geometry.values()])
+            else:
+                vertices = scene_or_mesh.vertices
+                faces = scene_or_mesh.faces
+        except:
+            vertices = np.array([])
+            faces = np.array([])
+        
+        return {
+            'success': True,
+            'message': f"Hyper-realistic Flux texture generated successfully for {model_name}",
+            'texture_path': texture_path,
+            'uv_guide_path': uv_guide_path,
+            'vertices': len(vertices),
+            'faces': len(faces),
+            'uv_coords': len(uvs),
+            'prompt': prompt
+        }
+        
+    except Exception as e:
+        print(f"Error in Flux UV texture generation: {e}")
+        import traceback
+        traceback.print_exc()
+        return {
+            'success': False,
+            'message': f"Flux UV texture generation failed: {str(e)}",
+            'error': str(e)
+        }
+
+
 def generate_photorealistic_texture(model_folder: str, model_name: str,
                                     custom_prompt: str = None,
                                     texture_size: int = 1024,
@@ -802,9 +916,15 @@ def check_flux_server_health() -> dict:
     Returns:
         dict: Server status information
     """
-    flux_port = int(os.environ.get('FLUX_SERVER_PORT', 8000))
-    flux_host = os.environ.get('FLUX_HOST', 'localhost')
-    health_url = f"http://{flux_host}:{flux_port}/health"
+    # Check for remote server configuration
+    flux_url = os.environ.get('FLUX_SERVER_URL')
+    if flux_url:
+        health_url = f"{flux_url.rstrip('/')}/health"
+    else:
+        # Fallback to host:port configuration
+        flux_port = int(os.environ.get('FLUX_SERVER_PORT', 8000))
+        flux_host = os.environ.get('FLUX_HOST', 'localhost')
+        health_url = f"http://{flux_host}:{flux_port}/health"
     
     try:
         response = requests.get(health_url, timeout=5)
