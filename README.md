@@ -18,7 +18,16 @@ This project provides a complete pipeline for converting NIfTI medical imaging f
 
 ```
 HPE-Voxels/
-├── input/nifti/           # Input NIfTI files (.nii.gz)
+├── frontend/             # Web-based viewers (Streamlit apps)
+│   ├── glb_viewer.py
+│   ├── model_viewer.py
+│   └── obj_viewer.py
+├── backend/              # FLUX.1-dev API server
+│   ├── flux_server.py
+│   ├── run_server.sh
+│   ├── setup_ubuntu.sh
+│   └── requirements.txt
+├── input/nifti/          # Input NIfTI files (.nii.gz)
 ├── output/
 │   ├── obj/              # Intermediate OBJ files
 │   ├── glb/              # GLB files for conversion
@@ -93,10 +102,10 @@ Interactive viewer for all model types with texture support:
 
 ```bash
 # Start the model viewer
-python model_viewer.py
+python frontend/model_viewer.py
 
 # Custom port
-MODEL_VIEWER_PORT=8503 python model_viewer.py
+MODEL_VIEWER_PORT=8503 python frontend/model_viewer.py
 ```
 
 #### GLB Viewer
@@ -104,17 +113,17 @@ Simple viewer specifically for GLB files:
 
 ```bash
 # Start GLB viewer
-python glb_viewer.py
+python frontend/glb_viewer.py
 
 # Custom port
-GLB_VIEWER_PORT=8502 python glb_viewer.py
+GLB_VIEWER_PORT=8502 python frontend/glb_viewer.py
 ```
 
 #### Object Viewer
 Basic viewer for OBJ files:
 
 ```bash
-python obj_viewer.py
+python frontend/obj_viewer.py
 ```
 
 ## Model Folder Structure
@@ -147,6 +156,7 @@ The `vista3d_label_colors.json` file contains color definitions for different an
 
 ## Scripts Overview
 
+### Processing Pipeline
 | Script | Purpose | Input | Output |
 |--------|---------|-------|--------|
 | `nifti2obj.py` | Convert NIfTI to OBJ | `.nii.gz` files | `.obj` files |
@@ -154,9 +164,18 @@ The `vista3d_label_colors.json` file contains color definitions for different an
 | `glb2model.py` | Organize GLB into model folders | `.glb` files | Model folders |
 | `generate_placeholder_diffuse_textures.py` | Create placeholder textures | Model folders | `textures/diffuse.png` |
 | `generate_heart_diffuse.py` | Create realistic heart textures | Heart models | `textures/diffuse.png` |
-| `model_viewer.py` | Interactive 3D model viewer | Model folders | Web interface |
-| `glb_viewer.py` | GLB file viewer | `.glb` files | Web interface |
-| `obj_viewer.py` | OBJ file viewer | `.obj` files | Web interface |
+
+### Frontend (Web Viewers)
+| Script | Purpose | Input | Output |
+|--------|---------|-------|--------|
+| `frontend/model_viewer.py` | Interactive 3D model viewer | Model folders | Web interface |
+| `frontend/glb_viewer.py` | GLB file viewer | `.glb` files | Web interface |
+| `frontend/obj_viewer.py` | OBJ file viewer | `.obj` files | Web interface |
+
+### Backend (API Server)
+| Script | Purpose | Documentation |
+|--------|---------|---------------|
+| `backend/flux_server.py` | FLUX.1-dev text-to-image API | See `backend/README.md` |
 
 ## Dependencies
 
