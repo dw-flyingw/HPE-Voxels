@@ -66,20 +66,22 @@ async def lifespan(app: FastAPI):
     torch_dtype = torch.bfloat16 if torch_dtype_str == "bfloat16" else torch.float16
     
     try:
-        # Load the pipeline directly to GPU
+        # Load the pipeline to GPU
         # H200 has 141GB VRAM - more than enough for FLUX (~24GB needed)
-        print("✓ Loading model directly to GPU (full GPU mode)")
+        print("✓ Loading model to GPU (full GPU mode)")
         
         pipeline = FluxPipeline.from_pretrained(
             model_name,
             torch_dtype=torch_dtype,
-            token=hf_token,
-            device_map="auto",  # Automatically map to GPU
+            token=hf_token
         )
+        
+        # Move to CUDA
+        pipeline = pipeline.to("cuda")
         
         print(f"✓ Model loaded successfully")
         print(f"✓ Using dtype: {torch_dtype}")
-        print(f"✓ Primary device: cuda")
+        print(f"✓ Device: cuda")
         
     except Exception as e:
         print(f"✗ Failed to load model: {e}")
