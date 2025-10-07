@@ -8,8 +8,9 @@ torchvision>=0.15.0
 torchaudio>=2.0.0
 
 # Diffusion Models
-diffusers>=0.31.0
-transformers>=4.44.0
+# Note: Using specific versions due to compatibility issues
+diffusers==0.30.3
+transformers==4.44.2
 accelerate>=0.34.0
 sentencepiece>=0.2.0
 

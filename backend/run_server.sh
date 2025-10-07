@@ -46,3 +46,4 @@ echo ""
 echo "Starting server..."
 python3 flux_server.py
 
+

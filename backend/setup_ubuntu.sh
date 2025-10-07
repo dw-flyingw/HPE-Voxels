@@ -190,3 +190,4 @@ echo ""
 echo "The first run will download the model (~24GB), which may take some time."
 echo ""
 
+
