@@ -5,7 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
     container_name: flux-backend
+    image: flux-backend:latest
     
     # GPU configuration - requires nvidia-docker runtime
     deploy:

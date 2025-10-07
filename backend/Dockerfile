@@ -26,18 +26,18 @@ RUN ln -sf /usr/bin/python3.11 /usr/bin/python3 && \
 # Upgrade pip
 RUN pip3 install --no-cache-dir --upgrade pip
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Copy project configuration
+COPY pyproject.toml .
 
-# Install PyTorch with CUDA support
+# Install PyTorch with CUDA support first (for better caching)
 RUN pip3 install --no-cache-dir \
     torch==2.1.0 \
     torchvision==0.16.0 \
     torchaudio==2.1.0 \
     --index-url https://download.pytorch.org/whl/cu121
 
-# Install other Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Install project dependencies using pyproject.toml
+RUN pip3 install --no-cache-dir -e .
 
 # Copy application code
 COPY flux_server.py .

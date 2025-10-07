@@ -1,27 +1,28 @@
-# FLUX.1-dev Backend Requirements
-# For Ubuntu server with Nvidia H200 GPUs
-
-# PyTorch with CUDA support
-# Install separately: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# Core FLUX.1-dev dependencies
 torch>=2.0.0
 torchvision>=0.15.0
-torchaudio>=2.0.0
+diffusers>=0.21.0
+transformers>=4.30.0
+accelerate>=0.20.0
 
-# Diffusion Models
-# Note: Using specific versions due to compatibility issues
-diffusers==0.30.3
-transformers==4.44.2
-accelerate>=0.34.0
-sentencepiece>=0.2.0
+# Web server dependencies
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+python-multipart>=0.0.6
 
-# API Server
-fastapi>=0.115.0
-uvicorn[standard]>=0.30.0
+# Image processing dependencies
+Pillow>=9.5.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# HTTP client for testing
+requests>=2.31.0
+
+# Environment management
 python-dotenv>=1.0.0
 
-# Image Processing
-pillow>=10.0.0
+# Optional: Better logging
+colorlog>=6.7.0
 
-# Utilities
-pydantic>=2.0.0
-
+# Optional: Performance monitoring
+psutil>=5.9.0
