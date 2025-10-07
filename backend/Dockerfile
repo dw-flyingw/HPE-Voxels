@@ -39,9 +39,10 @@ RUN pip3 install --no-cache-dir \
 
 # Install core AI dependencies with compatible versions
 RUN pip3 install --no-cache-dir \
-    transformers==4.36.0 \
-    diffusers==0.25.0 \
-    accelerate==0.25.0
+    huggingface_hub==0.17.3 \
+    transformers==4.35.2 \
+    diffusers==0.24.0 \
+    accelerate==0.24.1
 
 # Install web server dependencies
 RUN pip3 install --no-cache-dir \
