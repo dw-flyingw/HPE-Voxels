@@ -21,6 +21,13 @@ import json
 import base64
 from pathlib import Path
 
+# Import logic functions
+from logic.model_viewer_logic import (
+    generate_photorealistic_texture,
+    check_flux_server_health,
+    generate_texture_prompt
+)
+
 # --- Page Configuration ---
 st.set_page_config(
     page_title="Model Viewer - 3D Model Viewer",
@@ -127,9 +134,26 @@ def render_glb_viewer(file_path, height=600):
                 renderer.toneMappingExposure = 1.5;
                 document.getElementById('canvas').appendChild(renderer.domElement);
                 
-                // Simple ambient light for basic visibility
-                const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
-                scene.add(ambientLight);
+            // Much brighter lighting for better visibility
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+            scene.add(ambientLight);
+            
+            // Multiple directional lights for better coverage
+            const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight1.position.set(5, 5, 5);
+            scene.add(directionalLight1);
+            
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight2.position.set(-5, 5, -5);
+            scene.add(directionalLight2);
+            
+            const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.6);
+            directionalLight3.position.set(0, -5, 0);
+            scene.add(directionalLight3);
+            
+            // Bright hemisphere light for even illumination
+            const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
+            scene.add(hemisphereLight);
                 
                 // Controls
                 const controls = new OrbitControls(camera, renderer.domElement);
@@ -178,12 +202,19 @@ def render_glb_viewer(file_path, height=600):
                     }}
                 }}
                 
-                // Create material with flat voxel appearance
-                const material = new THREE.MeshBasicMaterial({{ 
+                // Create material with maximum visibility (always opaque)
+                const material = new THREE.MeshStandardMaterial({{ 
                     vertexColors: colors && colors.length > 0,
                     side: THREE.DoubleSide,
-                    color: colors && colors.length > 0 ? 0xffffff : 0x888888,
-                    transparent: false
+                    color: colors && colors.length > 0 ? 0xffffff : 0xffffff,
+                    transparent: false,
+                    opacity: 1.0,
+                    depthWrite: true,
+                    depthTest: true,
+                    roughness: 0.1,
+                    metalness: 0.0,
+                    emissive: new THREE.Color(0x111111),
+                    emissiveIntensity: 0.2
                 }});
                 
                 // Create mesh
@@ -322,17 +353,25 @@ def load_model_info(file_path):
 
 def get_available_model_folders():
     """Get list of available model folders from ./output/models."""
-    models_dir = "./output/models"
+    # Support environment variable for models directory, with fallback to default
+    models_dir = os.environ.get('MODELS_DIR', None)
     
-    if not os.path.exists(models_dir):
+    if not models_dir:
+        # Get the script's directory and resolve path relative to project root
+        script_dir = Path(__file__).resolve().parent
+        project_root = script_dir.parent  # Go up one level from frontend/ to project root
+        models_dir = project_root / "output" / "models"
+    else:
+        models_dir = Path(models_dir)
+    
+    if not models_dir.exists():
         return []
     
-    # Get all subdirectories in ./output/models
+    # Get all subdirectories in the models directory
     available_folders = []
-    for item in os.listdir(models_dir):
-        folder_path = os.path.join(models_dir, item)
-        if os.path.isdir(folder_path):
-            available_folders.append(folder_path)
+    for item in models_dir.iterdir():
+        if item.is_dir():
+            available_folders.append(str(item))
     
     return sorted(available_folders)
 
@@ -397,6 +436,7 @@ def find_texture_in_folder(model_folder):
             texture_files.append(file)
     
     return texture_files
+
 
 def load_gltf_with_textures(gltf_path):
     """Load GLTF file and return model data with proper texture handling."""
@@ -925,8 +965,8 @@ def load_gltf_with_textures(gltf_path):
 #    
 #    return viewer_html
 
-def create_simple_textured_viewer(gltf_info, height=600):
-    """Create a simple Three.js viewer with texture support."""
+def create_advanced_textured_viewer(gltf_info, height=600):
+    """Create an advanced Three.js viewer with comprehensive texture support."""
     
     # Prepare mesh data for JavaScript
     mesh_data_js = {
@@ -939,10 +979,9 @@ def create_simple_textured_viewer(gltf_info, height=600):
     # Convert to JSON string safely
     mesh_data_json = json.dumps(mesh_data_js)
     
-    # Find texture data
-    texture_data = None
-    if gltf_info['textures']:
-        texture_data = list(gltf_info['textures'].values())[0]  # Use first texture
+    # Prepare texture and material data
+    textures_json = json.dumps(gltf_info['textures'])
+    materials_json = json.dumps(gltf_info['materials'])
     
     viewer_html = f"""
     <!DOCTYPE html>
@@ -955,19 +994,37 @@ def create_simple_textured_viewer(gltf_info, height=600):
                 position: absolute;
                 top: 10px;
                 left: 10px;
-                background: rgba(0,0,0,0.7);
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                font-family: Arial, sans-serif;
+                font-size: 12px;
+                z-index: 1000;
+                max-width: 300px;
+            }}
+            #info {{
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(0,0,0,0.8);
                 color: white;
                 padding: 10px;
                 border-radius: 5px;
                 font-family: Arial, sans-serif;
-                font-size: 12px;
+                font-size: 11px;
                 z-index: 1000;
+                max-width: 200px;
             }}
         </style>
     </head>
     <body>
         <div id="controls">
-            🖱️ Left-click: Rotate | Right-click: Pan | Scroll: Zoom
+            🖱️ Left-click: Rotate | Right-click: Pan | Scroll: Zoom<br/>
+            📐 Advanced texture mapping enabled
+        </div>
+        <div id="info">
+            <div id="texture-info">Loading textures...</div>
         </div>
         <div id="canvas"></div>
         
@@ -991,15 +1048,25 @@ def create_simple_textured_viewer(gltf_info, height=600):
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / {height}, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({{ antialias: true }});
             renderer.setSize(window.innerWidth, {height});
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
             document.getElementById('canvas').appendChild(renderer.domElement);
             
-            // Enhanced lighting for brighter display
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+            // Enhanced lighting for textured materials
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
             scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 5, 5);
-            scene.add(directionalLight);
+            const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight1.position.set(5, 5, 5);
+            scene.add(directionalLight1);
+            
+            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight2.position.set(-5, 5, -5);
+            scene.add(directionalLight2);
+            
+            const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.8);
+            scene.add(hemisphereLight);
             
             // Controls
             const controls = new OrbitControls(camera, renderer.domElement);
@@ -1008,8 +1075,20 @@ def create_simple_textured_viewer(gltf_info, height=600):
             
             // Load mesh data
             const meshData = {mesh_data_json};
+            const texturesData = {textures_json};
+            const materialsData = {materials_json};
             
             console.log('Mesh data:', meshData.vertices.length, 'vertices,', meshData.faces.length, 'faces');
+            console.log('Textures available:', Object.keys(texturesData).length);
+            console.log('Materials available:', Object.keys(materialsData).length);
+            
+            // Update texture info display
+            const textureInfoDiv = document.getElementById('texture-info');
+            textureInfoDiv.innerHTML = `
+                Textures: ${{Object.keys(texturesData).length}}<br/>
+                Materials: ${{Object.keys(materialsData).length}}<br/>
+                UVs: ${{meshData.uvs.length > 0 ? 'Yes' : 'Generated'}}
+            `;
             
             // Create geometry
             const geometry = new THREE.BufferGeometry();
@@ -1027,38 +1106,128 @@ def create_simple_textured_viewer(gltf_info, height=600):
             }}
             geometry.setIndex(triangles);
             
-            // Generate UV coordinates if needed
+            // Handle UV coordinates
             if (meshData.uvs.length === 0) {{
                 console.log('Generating UV coordinates...');
+                geometry.computeBoundingBox();
                 const positionAttribute = geometry.getAttribute('position');
                 const uvCount = positionAttribute.count;
                 const uvs = new Float32Array(uvCount * 2);
                 
                 for (let i = 0; i < uvCount; i++) {{
                     const x = positionAttribute.getX(i);
+                    const y = positionAttribute.getY(i);
                     const z = positionAttribute.getZ(i);
-                    uvs[i * 2] = (x + 100) / 200;  // Simple normalization
-                    uvs[i * 2 + 1] = (z + 100) / 200;
+                    
+                    // Better UV mapping based on spherical coordinates
+                    const u = Math.atan2(z, x) / (2 * Math.PI) + 0.5;
+                    const v = (y - geometry.boundingBox.min.y) / (geometry.boundingBox.max.y - geometry.boundingBox.min.y);
+                    
+                    uvs[i * 2] = isNaN(u) ? 0 : u;
+                    uvs[i * 2 + 1] = isNaN(v) ? 0 : v;
                 }}
                 geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+                console.log('Generated UV coordinates for', uvCount, 'vertices');
             }} else {{
                 geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(meshData.uvs.flat()), 2));
+                console.log('Using existing UV coordinates');
             }}
             
             // Compute normals
             geometry.computeVertexNormals();
             
-            // Create material
+            // Create materials with proper texture support
+            const textureLoader = new THREE.TextureLoader();
+            const materials = {{}};
+            
+            // Create materials based on GLTF material data (force opaque)
+            for (const [key, matData] of Object.entries(materialsData)) {{
+                const material = new THREE.MeshStandardMaterial();
+                material.name = matData.name || 'material_' + key;
+                material.side = THREE.DoubleSide;  // Always render both sides
+                material.roughness = 0.3;
+                material.metalness = 0.0;
+                material.emissive = new THREE.Color(0x111111);
+                material.emissiveIntensity = 0.1;
+                
+                // Force opaque rendering to prevent see-through issues
+                material.transparent = false;
+                material.opacity = 1.0;
+                material.depthWrite = true;
+                material.depthTest = true;
+                
+                // Handle base color
+                if (matData.baseColorFactor) {{
+                    material.color.setRGB(
+                        matData.baseColorFactor[0],
+                        matData.baseColorFactor[1], 
+                        matData.baseColorFactor[2]
+                    );
+                    // Ignore alpha channel - keep material opaque
+                }}
+                
+                // Handle diffuse color (legacy)
+                if (matData.diffuseFactor) {{
+                    material.color.setRGB(
+                        matData.diffuseFactor[0],
+                        matData.diffuseFactor[1], 
+                        matData.diffuseFactor[2]
+                    );
+                    // Ignore alpha channel - keep material opaque
+                }}
+                
+                // Apply textures
+                if (matData.baseColorTexture) {{
+                    const texture = textureLoader.load(matData.baseColorTexture);
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    material.map = texture;
+                    console.log('Applied baseColorTexture to material', key);
+                }}
+                
+                if (matData.diffuseTexture) {{
+                    const texture = textureLoader.load(matData.diffuseTexture);
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    material.map = texture;
+                    console.log('Applied diffuseTexture to material', key);
+                }}
+                
+                materials[key] = material;
+            }}
+            
+            // Create mesh with appropriate material
             let material;
-            if ('{texture_data}') {{
-                const textureLoader = new THREE.TextureLoader();
-                const texture = textureLoader.load('{texture_data}');
-                texture.colorSpace = THREE.SRGBColorSpace;
-                material = new THREE.MeshStandardMaterial({{ map: texture, side: THREE.DoubleSide }});
-                console.log('Using textured material');
+            if (Object.keys(materials).length > 0) {{
+                material = materials[0]; // Use first material
+                console.log('Using material:', material.name);
             }} else {{
-                material = new THREE.MeshStandardMaterial({{ color: 0xff6b6b, side: THREE.DoubleSide }});
-                console.log('Using solid color material');
+                // Create default material with fallback texture (always opaque)
+                material = new THREE.MeshStandardMaterial({{
+                    color: 0xcccccc,
+                    side: THREE.DoubleSide,
+                    roughness: 0.3,
+                    metalness: 0.0,
+                    emissive: new THREE.Color(0x111111),
+                    emissiveIntensity: 0.1,
+                    transparent: false,
+                    opacity: 1.0,
+                    depthWrite: true,
+                    depthTest: true
+                }});
+                
+                // Try to apply any available texture
+                if (Object.keys(texturesData).length > 0) {{
+                    const firstTexture = Object.values(texturesData)[0];
+                    const texture = textureLoader.load(firstTexture);
+                    texture.colorSpace = THREE.SRGBColorSpace;
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    material.map = texture;
+                    console.log('Applied fallback texture to default material');
+                }}
             }}
             
             // Create mesh
@@ -1189,32 +1358,133 @@ with st.sidebar:
                     with open(model_file, 'r') as f:
                         gltf_data = json.load(f)
                     
-                    # Show texture info
+                    # Show enhanced texture info
                     if 'images' in gltf_data:
-                        st.caption(f"Found {len(gltf_data['images'])} texture(s)")
+                        st.success(f"✅ Found {len(gltf_data['images'])} texture(s)")
                         for i, img in enumerate(gltf_data['images']):
                             if 'uri' in img:
-                                st.caption(f"  - Texture {i}: {img['uri']}")
+                                texture_path = os.path.join(selected_folder, img['uri'])
+                                texture_exists = os.path.exists(texture_path)
+                                status = "✅" if texture_exists else "❌"
+                                st.caption(f"{status} Texture {i}: {img['uri']}")
+                                if texture_exists:
+                                    file_size = os.path.getsize(texture_path)
+                                    st.caption(f"    Size: {file_size:,} bytes")
+                    else:
+                        st.warning("⚠️ No textures found in GLTF")
                     
-                    # Show material info
+                    # Show enhanced material info
                     if 'materials' in gltf_data:
-                        st.caption(f"Found {len(gltf_data['materials'])} material(s)")
+                        st.success(f"✅ Found {len(gltf_data['materials'])} material(s)")
                         for i, mat in enumerate(gltf_data['materials']):
                             mat_name = mat.get('name', f'material_{i}')
-                            st.caption(f"  - Material {i}: {mat_name}")
+                            st.caption(f"📦 Material {i}: {mat_name}")
                             
                             # Check for texture references
+                            has_texture = False
                             if 'pbrMetallicRoughness' in mat and 'baseColorTexture' in mat['pbrMetallicRoughness']:
                                 tex_idx = mat['pbrMetallicRoughness']['baseColorTexture']['index']
-                                st.caption(f"    → Uses baseColorTexture {tex_idx}")
+                                st.caption(f"    🎨 Uses baseColorTexture {tex_idx}")
+                                has_texture = True
                             
                             if 'extensions' in mat and 'KHR_materials_pbrSpecularGlossiness' in mat['extensions']:
                                 sg = mat['extensions']['KHR_materials_pbrSpecularGlossiness']
                                 if 'diffuseTexture' in sg:
                                     tex_idx = sg['diffuseTexture']['index']
-                                    st.caption(f"    → Uses diffuseTexture {tex_idx}")
+                                    st.caption(f"    🎨 Uses diffuseTexture {tex_idx}")
+                                    has_texture = True
+                            
+                            if not has_texture:
+                                st.caption(f"    ⚪ No textures assigned")
+                    else:
+                        st.warning("⚠️ No materials found in GLTF")
                 except Exception as e:
                     st.caption(f"Debug info error: {e}")
+            
+            # === FLUX Texture Generation Section ===
+            st.divider()
+            st.header("🎨 AI Texture Generation")
+            
+            # Check Flux server status
+            flux_status = check_flux_server_health()
+            
+            if flux_status['available']:
+                st.success("✅ Flux server is running")
+                
+                # Show model name
+                model_display_name = os.path.basename(selected_folder)
+                st.caption(f"Model: **{model_display_name}**")
+                
+                # Auto-generated prompt preview
+                auto_prompt = generate_texture_prompt(model_display_name)
+                st.caption("Auto-generated prompt:")
+                st.text_area("Prompt Preview", auto_prompt, height=100, disabled=True, key="prompt_preview")
+                
+                # Custom prompt option
+                use_custom_prompt = st.checkbox("Use custom prompt", value=False)
+                custom_prompt = None
+                if use_custom_prompt:
+                    custom_prompt = st.text_area(
+                        "Custom prompt",
+                        value=auto_prompt,
+                        height=100,
+                        help="Describe the texture you want to generate"
+                    )
+                
+                # Texture size options
+                texture_size = st.selectbox(
+                    "Texture size",
+                    options=[512, 1024, 2048],
+                    index=1,
+                    help="Higher resolution = better quality but slower generation"
+                )
+                
+                # Generate button
+                if st.button("🚀 Generate Photo-Realistic Texture", type="primary"):
+                    with st.spinner("Generating texture with Flux AI... This may take 1-2 minutes..."):
+                        result = generate_photorealistic_texture(
+                            model_folder=selected_folder,
+                            model_name=model_display_name,
+                            custom_prompt=custom_prompt if use_custom_prompt else None,
+                            texture_size=texture_size
+                        )
+                        
+                        if result['success']:
+                            st.success(result['message'])
+                            st.balloons()
+                            
+                            # Show results
+                            st.markdown("**Generated files:**")
+                            if result.get('texture_path'):
+                                st.caption(f"✅ Texture: {os.path.basename(result['texture_path'])}")
+                            if result.get('obj_path'):
+                                st.caption(f"✅ OBJ: {os.path.basename(result['obj_path'])}")
+                            if result.get('gltf_path'):
+                                st.caption(f"✅ GLTF: {os.path.basename(result['gltf_path'])}")
+                            if result.get('glb_path'):
+                                st.caption(f"✅ GLB: {os.path.basename(result['glb_path'])}")
+                            
+                            # Show stats
+                            st.caption(f"Vertices: {result.get('vertices', 0):,}")
+                            st.caption(f"Faces: {result.get('faces', 0):,}")
+                            st.caption(f"UV Coordinates: {result.get('uv_coords', 0):,}")
+                            
+                            st.info("💡 Reload the page to see the textured model")
+                        else:
+                            st.error(result['message'])
+                            if 'error' in result:
+                                st.caption(f"Error details: {result['error']}")
+                
+            else:
+                st.warning("⚠️ Flux server is not available")
+                st.caption("Please start the Flux server to use AI texture generation")
+                flux_port = os.environ.get('FLUX_SERVER_PORT', 8000)
+                st.code(f"cd backend && python flux_server.py", language="bash")
+                st.caption(f"Server should be running at: http://localhost:{flux_port}")
+                if 'error' in flux_status:
+                    with st.expander("Error details"):
+                        st.text(flux_status['error'])
+            
         else:
             st.error(f"No model files found in {os.path.basename(selected_folder)}")
             st.caption("Expected formats: scene.glb, scene.gltf, or other 3D model files")
@@ -1230,8 +1500,8 @@ if selected_file and os.path.exists(selected_file):
         gltf_info = load_gltf_with_textures(selected_file)
         if gltf_info:
             print("GLTF loaded successfully, creating viewer...")
-            # Create viewer with texture support
-            viewer_html = create_simple_textured_viewer(gltf_info, height=600)
+            # Create advanced viewer with comprehensive texture support
+            viewer_html = create_advanced_textured_viewer(gltf_info, height=600)
             components.html(viewer_html, height=650)
         else:
             st.error("Failed to load GLTF file")

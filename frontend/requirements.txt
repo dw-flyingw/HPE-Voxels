@@ -1,0 +1,24 @@
+# Frontend Requirements for HPE-Voxels
+
+# Core Dependencies
+streamlit>=1.28.0
+python-dotenv>=1.0.0
+
+# 3D Processing
+trimesh>=4.0.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Networking
+requests>=2.31.0
+
+# 3D Visualization (optional)
+pyvista>=0.42.0
+vtk>=9.2.0
+
+# NIfTI support
+nibabel>=5.1.0
+

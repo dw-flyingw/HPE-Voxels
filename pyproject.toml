@@ -45,6 +45,7 @@ dependencies = [
     "fastapi>=0.115.0",
     "uvicorn>=0.30.0",
     "python-dotenv>=1.0.0",
+    "dotenv>=0.9.9",
 ]
 
 [tool.setuptools.packages.find]
