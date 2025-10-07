@@ -1,7 +1,7 @@
 # FLUX.1-dev Backend Dockerfile
 # Optimized for NVIDIA H200 GPU
 
-FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
 
 # Prevent interactive prompts during build
 ENV DEBIAN_FRONTEND=noninteractive
@@ -30,21 +30,31 @@ RUN pip3 install --no-cache-dir --upgrade pip
 COPY pyproject.toml .
 
 # Install PyTorch with CUDA support first (for better caching)
-# Using stable compatible versions for CUDA 12.1
+# Using latest stable versions for CUDA 12.1
 RUN pip3 install --no-cache-dir \
-    torch==2.1.2 \
-    torchvision==0.16.2 \
-    torchaudio==2.1.2 \
+    torch==2.2.0 \
+    torchvision==0.17.0 \
+    torchaudio==2.2.0 \
     --index-url https://download.pytorch.org/whl/cu121
 
-# Install core dependencies first to avoid conflicts
+# Install core AI dependencies with compatible versions
 RUN pip3 install --no-cache-dir \
-    transformers==4.35.2 \
-    diffusers==0.24.0 \
-    accelerate==0.24.1
+    transformers==4.36.0 \
+    diffusers==0.25.0 \
+    accelerate==0.25.0
 
-# Install remaining project dependencies
-RUN pip3 install --no-cache-dir -e .
+# Install web server dependencies
+RUN pip3 install --no-cache-dir \
+    fastapi==0.104.1 \
+    uvicorn[standard]==0.24.0 \
+    python-multipart==0.0.6
+
+# Install remaining dependencies
+RUN pip3 install --no-cache-dir \
+    Pillow==10.1.0 \
+    numpy==1.24.4 \
+    scipy==1.11.4 \
+    python-dotenv==1.0.0
 
 # Copy application code
 COPY flux_server.py .
