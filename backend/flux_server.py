@@ -73,10 +73,21 @@ async def lifespan(app: FastAPI):
             token=hf_token
         )
         
-        # Enable model CPU offload for memory efficiency
-        # With H200 GPUs, you may not need this, but it's here for flexibility
-        # Comment out the next line if you have enough VRAM
-        pipeline.enable_model_cpu_offload()
+        # Move to GPU - H200 has 141GB VRAM, more than enough for FLUX
+        # If you have a smaller GPU and need CPU offload, set FLUX_USE_CPU_OFFLOAD=true in .env
+        use_cpu_offload = os.getenv("FLUX_USE_CPU_OFFLOAD", "false").lower() == "true"
+        
+        if use_cpu_offload:
+            print("⚠ Using CPU offload mode (slower but uses less VRAM)")
+            try:
+                pipeline.enable_model_cpu_offload()
+            except Exception as offload_error:
+                print(f"⚠ CPU offload failed: {offload_error}")
+                print("  Falling back to GPU-only mode...")
+                pipeline.to("cuda")
+        else:
+            print("✓ Using full GPU mode (faster, requires ~24GB VRAM)")
+            pipeline.to("cuda")
         
         print(f"✓ Model loaded successfully on device: {pipeline.device}")
         print(f"✓ Using dtype: {torch_dtype}")
