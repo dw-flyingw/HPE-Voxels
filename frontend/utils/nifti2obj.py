@@ -252,7 +252,7 @@ def load_label_info(json_path):
 
 def nifti_to_mesh(nib_img: nib.Nifti1Image, threshold: float, smoothing: int, decimation: float, 
                   label_info: dict = None, base_name: str = None, textured_voxels: np.ndarray = None,
-                  close_boundaries: bool = False, hole_filling_method: str = 'convex'):
+                  close_boundaries: bool = True, hole_filling_method: str = 'convex'):
     """Converts a single-label NIfTI image to a trimesh Mesh."""
     data = nib_img.get_fdata()
     spacing = nib_img.header.get_zooms()[:3]  # Get voxel spacing (x, y, z)
@@ -344,7 +344,7 @@ def nifti_to_mesh(nib_img: nib.Nifti1Image, threshold: float, smoothing: int, de
 
 
 def nifti_to_multilabel_mesh(nib_img: nib.Nifti1Image, label_info: dict, smoothing: int, decimation: float, 
-                            textured_voxels: np.ndarray = None, close_boundaries: bool = False, 
+                            textured_voxels: np.ndarray = None, close_boundaries: bool = True, 
                             hole_filling_method: str = 'convex'):
     """Converts a multi-label NIfTI into a colored and named list of meshes."""
     data = nib_img.get_fdata()
@@ -451,7 +451,7 @@ def nifti_to_multilabel_mesh(nib_img: nib.Nifti1Image, label_info: dict, smoothi
 
 def process_directory(input_dir: str, output_dir: str, threshold: float,
                       smoothing: int, decimation: float, verbose: bool = False,
-                      close_boundaries: bool = False, hole_filling_method: str = 'convex'):
+                      close_boundaries: bool = True, hole_filling_method: str = 'convex'):
     os.makedirs(output_dir, exist_ok=True)
     nifti_files = glob.glob(os.path.join(input_dir, "*.nii.gz"))
     # Load label info from conf directory
@@ -535,8 +535,10 @@ def parse_args():
                         help="Mesh decimation fraction (0.0 to 1.0). Default: 0.5")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="Enable verbose output.")
-    parser.add_argument("--close-boundaries", action="store_true",
-                        help="Close boundary holes in clipped meshes to make them watertight.")
+    parser.add_argument("--close-boundaries", action="store_true", default=True,
+                        help="Close boundary holes in clipped meshes to make them watertight (default: True).")
+    parser.add_argument("--no-close-boundaries", dest="close_boundaries", action="store_false",
+                        help="Disable closing mesh boundaries.")
     parser.add_argument("--hole-filling", choices=['convex', 'planar'], default='convex',
                         help="Method for filling holes: 'convex' (convex hull) or 'planar' (simple triangulation). Default: convex")
     return parser.parse_args()

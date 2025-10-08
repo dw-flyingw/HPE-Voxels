@@ -73,6 +73,29 @@
       "byteLength": 335012
     }
   ],
+  "images": [
+    {
+      "uri": "textures/diffuse.png"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.8
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
+    }
+  ],
   "meshes": [
     {
       "primitives": [
@@ -93,6 +116,14 @@
       "mesh": 0
     }
   ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
   "scenes": [
     {
       "nodes": [
@@ -100,49 +131,10 @@
       ]
     }
   ],
-  "images": [
-    {
-      "uri": "textures/diffuse.png"
-    }
-  ],
   "textures": [
     {
-      "source": 0,
-      "sampler": 0
-    }
-  ],
-  "materials": [
-    {
-      "doubleSided": true,
-      "extensions": {
-        "KHR_materials_pbrSpecularGlossiness": {
-          "diffuseFactor": [
-            0.8,
-            0.8,
-            0.8,
-            1.0
-          ],
-          "diffuseTexture": {
-            "index": 0,
-            "texCoord": 0
-          },
-          "glossinessFactor": 0.5,
-          "specularFactor": [
-            0.2,
-            0.2,
-            0.2
-          ]
-        }
-      },
-      "name": "Material"
-    }
-  ],
-  "samplers": [
-    {
-      "magFilter": 9729,
-      "minFilter": 9987,
-      "wrapS": 10497,
-      "wrapT": 10497
+      "sampler": 0,
+      "source": 0
     }
   ]
 }

@@ -178,7 +178,7 @@ def generate_texture_with_flux(
     prompt: str,
     uv_mask: Image.Image,
     flux_server: str,
-    size: int = 1024,
+    size: int = 2048,
     guidance_scale: float = 3.5,
     num_steps: int = 50,
     seed: Optional[int] = None,
@@ -226,8 +226,12 @@ def generate_texture_with_flux(
         uv_mask.save(buffered, format="PNG")
         mask_b64 = base64.b64encode(buffered.getvalue()).decode()
         
+        # Enhanced prompt emphasizing non-repeating, unique texture
+        # Key additions: "unique variations", "non-repeating", "continuous surface"
+        enhanced_prompt = f"{prompt}, unique non-repeating texture, continuous organic variations, seamless UV mapping"
+        
         payload = {
-            "prompt": prompt,
+            "prompt": enhanced_prompt,
             "control_image": mask_b64,
             "control_type": "uv_layout",
             "height": size,
@@ -239,8 +243,11 @@ def generate_texture_with_flux(
         }
     else:
         endpoint = f"{server_url}/generate"
+        # Even without UV guidance, emphasize non-repeating texture
+        enhanced_prompt = f"{prompt}, unique non-repeating texture, organic continuous surface variations"
+        
         payload = {
-            "prompt": prompt,
+            "prompt": enhanced_prompt,
             "height": size,
             "width": size,
             "guidance_scale": guidance_scale,
@@ -251,7 +258,7 @@ def generate_texture_with_flux(
         }
     
     print(f"🎨 Generating texture...")
-    print(f"   Prompt: {prompt[:100]}...")
+    print(f"   Prompt: {enhanced_prompt[:100]}...")
     print(f"   Size: {size}x{size}")
     print(f"   Steps: {num_steps}")
     print(f"   Guidance: {guidance_scale}")
@@ -303,7 +310,7 @@ def apply_uv_mask_to_texture(texture: Image.Image, uv_mask: Image.Image) -> Imag
 def generate_organ_texture(
     organ_name: str,
     models_dir: str = "output/models",
-    size: int = 1024,
+    size: int = 2048,
     guidance_scale: float = 3.5,
     num_steps: int = 50,
     seed: Optional[int] = None,
@@ -481,9 +488,9 @@ Examples:
     parser.add_argument(
         '--size',
         type=int,
-        default=1024,
+        default=2048,
         choices=[512, 1024, 2048],
-        help='Texture size in pixels (default: 1024)'
+        help='Texture size in pixels (default: 2048)'
     )
     
     parser.add_argument(

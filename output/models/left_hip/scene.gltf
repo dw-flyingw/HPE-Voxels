@@ -5,17 +5,17 @@
       "byteOffset": 0,
       "componentType": 5126,
       "normalized": false,
-      "count": 77077,
+      "count": 38531,
       "type": "VEC3",
       "max": [
-        305.10736083984375,
-        241.93792724609375,
-        161.64964294433594
+        304.3844299316406,
+        241.20343017578125,
+        160.34642028808594
       ],
       "min": [
-        162.57606506347656,
-        80.82350158691406,
-        0.10264894366264343
+        163.66026306152344,
+        81.53939056396484,
+        0.39556556940078735
       ]
     },
     {
@@ -23,15 +23,15 @@
       "byteOffset": 0,
       "componentType": 5126,
       "normalized": false,
-      "count": 77077,
+      "count": 38531,
       "type": "VEC2",
       "max": [
-        0.9999755620956421,
-        0.9993290901184082
+        0.9999234080314636,
+        0.9987462162971497
       ],
       "min": [
-        8.549999620299786e-06,
-        0.0005366500117816031
+        0.0005800899816676974,
+        0.005082500167191029
       ]
     },
     {
@@ -39,7 +39,7 @@
       "byteOffset": 0,
       "componentType": 5125,
       "normalized": false,
-      "count": 462450,
+      "count": 231351,
       "type": "SCALAR"
     }
   ],
@@ -51,26 +51,49 @@
     {
       "buffer": 0,
       "byteOffset": 0,
-      "byteLength": 924924,
+      "byteLength": 462372,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteOffset": 924924,
-      "byteLength": 616616,
+      "byteOffset": 462372,
+      "byteLength": 308248,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteOffset": 1541540,
-      "byteLength": 1849800,
+      "byteOffset": 770620,
+      "byteLength": 925404,
       "target": 34963
     }
   ],
   "buffers": [
     {
       "uri": "scene.bin",
-      "byteLength": 3391340
+      "byteLength": 1696024
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/diffuse.png"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.8
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "alphaMode": "OPAQUE",
+      "doubleSided": true
     }
   ],
   "meshes": [
@@ -93,6 +116,14 @@
       "mesh": 0
     }
   ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
   "scenes": [
     {
       "nodes": [
@@ -100,49 +131,10 @@
       ]
     }
   ],
-  "images": [
-    {
-      "uri": "textures/diffuse.png"
-    }
-  ],
   "textures": [
     {
-      "source": 0,
-      "sampler": 0
-    }
-  ],
-  "materials": [
-    {
-      "doubleSided": true,
-      "extensions": {
-        "KHR_materials_pbrSpecularGlossiness": {
-          "diffuseFactor": [
-            0.8,
-            0.8,
-            0.8,
-            1.0
-          ],
-          "diffuseTexture": {
-            "index": 0,
-            "texCoord": 0
-          },
-          "glossinessFactor": 0.5,
-          "specularFactor": [
-            0.2,
-            0.2,
-            0.2
-          ]
-        }
-      },
-      "name": "Material"
-    }
-  ],
-  "samplers": [
-    {
-      "magFilter": 9729,
-      "minFilter": 9987,
-      "wrapS": 10497,
-      "wrapT": 10497
+      "sampler": 0,
+      "source": 0
     }
   ]
 }

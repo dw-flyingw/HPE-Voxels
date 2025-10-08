@@ -121,7 +121,7 @@ class Pipeline:
         threshold: float = 0.1,
         smoothing: int = 10,
         decimation: float = 0.5,
-        close_boundaries: bool = False
+        close_boundaries: bool = True
     ) -> bool:
         """Step 1: Convert NIfTI files to OBJ meshes."""
         self.print_step(1, 5, "Converting NIfTI to OBJ meshes")
@@ -180,7 +180,7 @@ class Pipeline:
     
     def step_create_uv_masks(self, mask_size: int = 1024, create_variants: bool = False) -> bool:
         """Step 4: Create UV masks for FLUX.1 texture generation."""
-        self.print_step(4, 5, "Creating UV masks for FLUX.1")
+        self.print_step(4, 6, "Creating UV masks for FLUX.1")
         
         cmd = [
             "python",
@@ -197,9 +197,71 @@ class Pipeline:
         
         return self.run_command(cmd, "UV mask creation")
     
+    def step_generate_textures(
+        self,
+        texture_size: int = 1024,
+        guidance_scale: float = 3.5,
+        num_steps: int = 50,
+        flux_server: Optional[str] = None
+    ) -> bool:
+        """Step 5: Generate FLUX textures for all models."""
+        self.print_step(5, 6, "Generating FLUX.1 Textures")
+        
+        # Get list of model directories
+        if not self.models_dir.exists():
+            print(f"✗ Models directory not found: {self.models_dir}")
+            return False
+        
+        model_dirs = [d for d in self.models_dir.iterdir() if d.is_dir()]
+        if not model_dirs:
+            print(f"✗ No model directories found in {self.models_dir}")
+            return False
+        
+        print(f"Found {len(model_dirs)} model(s) to texture:")
+        for model_dir in model_dirs:
+            print(f"  - {model_dir.name}")
+        
+        # Generate texture for each model
+        success_count = 0
+        failed_models = []
+        
+        for model_dir in model_dirs:
+            organ_name = model_dir.name
+            print(f"\n[*] Generating texture for: {organ_name}")
+            
+            cmd = [
+                "python",
+                str(self.utils_dir / "generate_flux_texture.py"),
+                "--organ", organ_name,
+                "--models-dir", str(self.models_dir),
+                "--size", str(texture_size),
+                "--guidance", str(guidance_scale),
+                "--steps", str(num_steps),
+            ]
+            
+            if flux_server:
+                cmd.extend(["--server", flux_server])
+            
+            # Run texture generation
+            if self.run_command(cmd, f"Texture generation for {organ_name}"):
+                success_count += 1
+            else:
+                failed_models.append(organ_name)
+        
+        # Summary
+        print(f"\n{'='*70}")
+        print(f"Texture Generation Summary:")
+        print(f"  - Successful: {success_count}/{len(model_dirs)}")
+        if failed_models:
+            print(f"  - Failed: {', '.join(failed_models)}")
+        print(f"{'='*70}\n")
+        
+        # Return True if at least one succeeded
+        return success_count > 0
+    
     def step_summary(self) -> bool:
-        """Step 5: Display summary of created files."""
-        self.print_step(5, 5, "Pipeline Summary")
+        """Step 6: Display summary of created files."""
+        self.print_step(6, 6, "Pipeline Summary")
         
         # Count files
         obj_files = list(self.obj_dir.glob("*.obj")) if self.obj_dir.exists() else []
@@ -216,15 +278,17 @@ class Pipeline:
             print(f"\nCreated model directories:")
             for model_dir in sorted(model_dirs):
                 has_mask = (model_dir / "uv_mask.png").exists()
+                has_flux_texture = (model_dir / "textures" / "flux_texture.png").exists()
                 has_texture = (model_dir / "textures" / "diffuse.png").exists()
                 mask_icon = "🎭" if has_mask else "  "
-                texture_icon = "🎨" if has_texture else "  "
-                print(f"  {mask_icon} {texture_icon} {model_dir.name}")
-            print(f"\n  🎭 = UV mask ready  🎨 = Texture available")
+                texture_icon = "🎨" if (has_flux_texture or has_texture) else "  "
+                flux_icon = "✨" if has_flux_texture else "  "
+                print(f"  {mask_icon} {texture_icon} {flux_icon} {model_dir.name}")
+            print(f"\n  🎭 = UV mask  🎨 = Texture  ✨ = FLUX texture")
         
         print(f"\nNext steps:")
-        print(f"  1. Use UV masks with FLUX.1 to generate textures")
-        print(f"  2. View models with: python frontend/model_viewer.py")
+        print(f"  1. View models with: python frontend/model_viewer.py")
+        print(f"  2. Regenerate textures: python frontend/utils/generate_flux_texture.py --organ <name>")
         print(f"  3. See frontend/utils/README.md for more options")
         
         return True
@@ -235,15 +299,17 @@ class Pipeline:
         skip_uv_unwrap: bool = False,
         skip_obj: bool = False,
         skip_masks: bool = False,
+        skip_textures: bool = False,
         nifti_params: Optional[dict] = None,
         uv_params: Optional[dict] = None,
-        mask_params: Optional[dict] = None
+        mask_params: Optional[dict] = None,
+        texture_params: Optional[dict] = None
     ) -> bool:
         """Run the complete pipeline."""
         
         print("╔" + "═"*68 + "╗")
         print("║" + " "*15 + "Medical Imaging Pipeline" + " "*29 + "║")
-        print("║" + " "*12 + "NIfTI → OBJ → UV Unwrap → Models → Masks" + " "*12 + "║")
+        print("║" + " "*7 + "NIfTI → OBJ → UV → Models → Masks → FLUX Textures" + " "*7 + "║")
         print("╚" + "═"*68 + "╝")
         
         # Check input files
@@ -281,7 +347,16 @@ class Pipeline:
         else:
             print("\n[Skipped] Step 4: UV mask creation")
         
-        # Step 5: Summary
+        # Step 5: Generate FLUX Textures
+        if not skip_textures:
+            params = texture_params or {}
+            if not self.step_generate_textures(**params):
+                print("\n⚠ Warning: Texture generation failed, but pipeline continues")
+                print("  Make sure FLUX server is running: cd backend && python flux_server.py")
+        else:
+            print("\n[Skipped] Step 5: FLUX texture generation")
+        
+        # Step 6: Summary
         self.step_summary()
         
         return True
@@ -294,20 +369,23 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Run complete pipeline with defaults
+  # Run complete pipeline with defaults (includes FLUX textures)
   python pipeline.py
   
   # Custom input/output
   python pipeline.py -i ./data/nifti -o ./data/output
   
   # High quality settings
-  python pipeline.py --smoothing 20 --decimation 0.2 --mask-size 2048
+  python pipeline.py --smoothing 20 --decimation 0.2 --mask-size 2048 --texture-size 2048 --texture-steps 100
   
-  # Skip certain steps (useful for re-runs)
-  python pipeline.py --skip-nifti --skip-obj --overwrite
+  # Skip texture generation (faster, requires FLUX server)
+  python pipeline.py --skip-textures
   
-  # Only create UV masks for existing models
-  python pipeline.py --skip-nifti --skip-obj --skip-glb --overwrite
+  # Only regenerate textures for existing models
+  python pipeline.py --skip-nifti --skip-uv-unwrap --skip-obj --skip-masks --overwrite
+  
+  # Custom FLUX server
+  python pipeline.py --flux-server 192.168.1.100:8000
         """
     )
     
@@ -346,7 +424,14 @@ Examples:
     nifti_group.add_argument(
         "--close-boundaries",
         action="store_true",
-        help="Close mesh boundaries to make watertight"
+        default=True,
+        help="Close mesh boundaries to make watertight (default: True)"
+    )
+    nifti_group.add_argument(
+        "--no-close-boundaries",
+        dest="close_boundaries",
+        action="store_false",
+        help="Disable closing mesh boundaries"
     )
     
     # UV unwrapping parameters
@@ -372,6 +457,34 @@ Examples:
         help="Create all UV mask variants (binary, soft, filled)"
     )
     
+    # FLUX texture generation parameters
+    texture_group = parser.add_argument_group("FLUX texture generation options")
+    texture_group.add_argument(
+        "--texture-size",
+        type=int,
+        default=1024,
+        choices=[512, 1024, 2048],
+        help="Texture size in pixels (default: 1024)"
+    )
+    texture_group.add_argument(
+        "--texture-steps",
+        type=int,
+        default=50,
+        help="FLUX inference steps (default: 50, higher = better quality)"
+    )
+    texture_group.add_argument(
+        "--texture-guidance",
+        type=float,
+        default=3.5,
+        help="FLUX guidance scale (default: 3.5)"
+    )
+    texture_group.add_argument(
+        "--flux-server",
+        type=str,
+        default=None,
+        help="FLUX server address (default: from .env or localhost:8000)"
+    )
+    
     # Pipeline control
     control_group = parser.add_argument_group("Pipeline control")
     control_group.add_argument(
@@ -393,6 +506,11 @@ Examples:
         "--skip-masks",
         action="store_true",
         help="Skip UV mask creation"
+    )
+    control_group.add_argument(
+        "--skip-textures",
+        action="store_true",
+        help="Skip FLUX texture generation"
     )
     
     # General options
@@ -441,15 +559,25 @@ def main():
         'create_variants': args.mask_variants
     }
     
+    # FLUX texture parameters
+    texture_params = {
+        'texture_size': args.texture_size,
+        'guidance_scale': args.texture_guidance,
+        'num_steps': args.texture_steps,
+        'flux_server': args.flux_server
+    }
+    
     # Run pipeline
     success = pipeline.run(
         skip_nifti=args.skip_nifti,
         skip_uv_unwrap=args.skip_uv_unwrap,
         skip_obj=args.skip_obj,
         skip_masks=args.skip_masks,
+        skip_textures=args.skip_textures,
         nifti_params=nifti_params,
         uv_params=uv_params,
-        mask_params=mask_params
+        mask_params=mask_params,
+        texture_params=texture_params
     )
     
     sys.exit(0 if success else 1)

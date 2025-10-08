@@ -290,7 +290,7 @@
     {
       "id": 62,
       "name": "colon",
-      "prompt": "hyper photo-realistic human colon tissue surface, medical photography, anatomically accurate colonic mucosa, rich deep pink-red coloration with high saturation, glossy wet mucous surface with specular highlights, complex organic folds and haustra segments, intricate surface irregularities and vascular patterns, moist mucous membrane appearance, natural mucosal texture with fine surface details, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic human colon tissue surface, medical photography, anatomically accurate colonic mucosa, rich deep pink-red coloration with high saturation, glossy wet mucous surface with bright specular highlights and reflective droplets, complex organic folds and haustra segments with intricate surface irregularities, moist mucous membrane appearance with wet sheen, natural mucosal texture with fine surface details and vascular patterns, soft diffused lighting highlighting folds and liquid droplets, clinical imaging quality, 8K resolution, professional medical illustration"
     },
     {
       "id": 63,
@@ -455,7 +455,7 @@
     {
       "id": 95,
       "name": "left hip",
-      "prompt": "hyper photo-realistic human left hip bone surface, medical photography, anatomically accurate isolated hip bone texture, white to beige color, smooth cortical surface with trabecular patterns, single hip bone only, no pelvic girdle or other bones, clinical imaging quality, 8K resolution, professional medical illustration"
+      "prompt": "hyper photo-realistic smooth bone surface texture, medical photography, clean ivory white to warm beige cortical bone material, FLAT smooth surface with subtle natural color variations, matte bone finish, NO bumps, NO geometric patterns, NO 3D relief, ONLY flat color texture with slight natural bone grain and subtle tonal shifts, professional medical texture map, 8K resolution"
     },
     {
       "id": 96,
