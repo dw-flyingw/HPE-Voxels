@@ -37,25 +37,8 @@ RUN pip3 install --no-cache-dir \
     torchaudio==2.2.0 \
     --index-url https://download.pytorch.org/whl/cu121
 
-# Install core AI dependencies with compatible versions
-RUN pip3 install --no-cache-dir \
-    huggingface_hub==0.19.4 \
-    transformers==4.35.2 \
-    diffusers==0.21.4 \
-    accelerate==0.24.1
-
-# Install web server dependencies
-RUN pip3 install --no-cache-dir \
-    fastapi==0.104.1 \
-    uvicorn[standard]==0.24.0 \
-    python-multipart==0.0.6
-
-# Install remaining dependencies
-RUN pip3 install --no-cache-dir \
-    Pillow==10.1.0 \
-    numpy==1.24.4 \
-    scipy==1.11.4 \
-    python-dotenv==1.0.0
+# Install all dependencies using pyproject.toml (let pip resolve versions automatically)
+RUN pip3 install --no-cache-dir -e .
 
 # Copy application code
 COPY flux_server.py .
