@@ -30,11 +30,11 @@ RUN pip3 install --no-cache-dir --upgrade pip
 COPY pyproject.toml .
 
 # Install PyTorch with CUDA support first (for better caching)
-# Using latest stable versions for CUDA 12.1
+# Using PyTorch 2.4+ which has torch.library.custom_op and NumPy 2.x compatibility
 RUN pip3 install --no-cache-dir \
-    torch==2.2.0 \
-    torchvision==0.17.0 \
-    torchaudio==2.2.0 \
+    torch==2.4.0 \
+    torchvision==0.19.0 \
+    torchaudio==2.4.0 \
     --index-url https://download.pytorch.org/whl/cu121
 
 # Install all dependencies using pyproject.toml (let pip resolve versions automatically)
