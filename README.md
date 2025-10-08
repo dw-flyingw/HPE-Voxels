@@ -177,6 +177,16 @@ The `vista3d_label_colors.json` file contains color definitions for different an
 |--------|---------|---------------|
 | `backend/flux_server.py` | FLUX.1-dev text-to-image API | See `backend/README.md` |
 
+## Quality Optimization
+
+For detailed information on optimizing conversion quality for different use cases, see:
+- **[Quality Guide](docs/QUALITY_GUIDE.md)** - Comprehensive guide to quality parameters and optimization
+
+Quick quality presets:
+- **Medical review**: `--threshold 0.05 --smoothing 5 --decimation 0.9`
+- **Web/education**: `--threshold 0.1 --smoothing 10 --decimation 0.5` (default)
+- **Mobile/AR**: `--threshold 0.2 --smoothing 15 --decimation 0.3`
+
 ## Dependencies
 
 Key dependencies include:

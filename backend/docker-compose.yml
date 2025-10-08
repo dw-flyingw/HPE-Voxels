@@ -27,8 +27,10 @@ services:
     
     # Volumes for model cache and data persistence
     volumes:
-      # Cache Hugging Face models to avoid re-downloading
+      # Cache Hugging Face models to avoid re-downloading (persistent volume)
       - huggingface-cache:/root/.cache/huggingface
+      # Mount additional space for large model downloads
+      - model-cache:/app/models
       # Optional: Mount local code for development
       # - ./flux_server.py:/app/flux_server.py
     
@@ -49,6 +51,8 @@ services:
 
 volumes:
   huggingface-cache:
+    driver: local
+  model-cache:
     driver: local
 
 networks:
