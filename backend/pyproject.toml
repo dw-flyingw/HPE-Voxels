@@ -28,12 +28,12 @@ classifiers = [
 ]
 
 dependencies = [
-    # Core FLUX.1-dev dependencies (let pip resolve compatible versions)
-    "diffusers>=0.21.0",
-    "transformers>=4.46.0",
-    "accelerate>=0.20.0",
-    "sentencepiece>=0.1.99",
-    "protobuf>=3.20.0",
+    # Core FLUX.1-dev dependencies - pinned versions for compatibility
+    "diffusers==0.32.1",
+    "transformers==4.47.1",
+    "accelerate==1.2.1",
+    "sentencepiece==0.2.0",
+    "protobuf==5.29.2",
     
     # Web server dependencies
     "fastapi>=0.100.0",
