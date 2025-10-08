@@ -1,1 +1,148 @@
-{"scene":0,"scenes":[{"nodes":[0]}],"asset":{"version":"2.0","generator":"https://github.com/mikedh/trimesh"},"accessors":[{"componentType":5125,"type":"SCALAR","bufferView":0,"count":94596,"max":[15765],"min":[0]},{"componentType":5126,"type":"VEC3","byteOffset":0,"bufferView":1,"count":15766,"max":[241.69606018066406,245.7059783935547,167.4937744140625],"min":[154.1361541748047,162.16323852539062,12.456062316894531]},{"componentType":5126,"type":"VEC2","byteOffset":0,"bufferView":3,"count":15766,"max":[0.999054491519928,0.6844806671142578],"min":[0.002533026970922947,0.0022599066141992807]},{"componentType":5126,"count":15766,"type":"VEC3","byteOffset":0,"bufferView":4,"max":[0.9999125003814697,0.9999912977218628,0.9999991059303284],"min":[-0.9999203085899353,-0.9999079704284668,-0.9999995827674866]}],"meshes":[{"name":"geometry_0","extras":{"units":"meters","from_gltf_primitive":false},"primitives":[{"attributes":{"POSITION":1,"TEXCOORD_0":2,"NORMAL":3},"indices":0,"mode":4,"material":0}]}],"images":[{"bufferView":2,"mimeType":"image/png"}],"textures":[{"source":0}],"materials":[{"pbrMetallicRoughness":{"baseColorTexture":{"index":0},"baseColorFactor":[1.0,1.0,1.0,1.0],"roughnessFactor":0.9036020036098448},"doubleSided":false}],"nodes":[{"name":"world","children":[1]},{"name":"geometry_0","mesh":0}],"buffers":[{"uri":"gltf_buffer_0.bin","byteLength":378384},{"uri":"gltf_buffer_1.bin","byteLength":189192},{"uri":"gltf_buffer_2.bin","byteLength":1051496},{"uri":"gltf_buffer_3.bin","byteLength":126128},{"uri":"gltf_buffer_4.bin","byteLength":189192}],"bufferViews":[{"buffer":0,"byteOffset":0,"byteLength":378384},{"buffer":1,"byteOffset":0,"byteLength":189192},{"buffer":2,"byteOffset":0,"byteLength":1051496},{"buffer":3,"byteOffset":0,"byteLength":126128},{"buffer":4,"byteOffset":0,"byteLength":189192}]}
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "normalized": false,
+      "count": 15766,
+      "type": "VEC3",
+      "max": [
+        241.69606018066406,
+        245.7059783935547,
+        167.4937744140625
+      ],
+      "min": [
+        154.1361541748047,
+        162.16323852539062,
+        12.456062316894531
+      ]
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "normalized": false,
+      "count": 15766,
+      "type": "VEC2",
+      "max": [
+        0.9999891519546509,
+        0.8893806338310242
+      ],
+      "min": [
+        7.542999810539186e-05,
+        0.005049120169132948
+      ]
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 0,
+      "componentType": 5125,
+      "normalized": false,
+      "count": 94596,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "generator": "pygltflib@v1.16.5",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 189192,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 189192,
+      "byteLength": 126128,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 315320,
+      "byteLength": 378384,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "scene.bin",
+      "byteLength": 693704
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "TEXCOORD_0": 1
+          },
+          "indices": 2,
+          "mode": 4,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0
+    }
+  ],
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/diffuse.png"
+    }
+  ],
+  "textures": [
+    {
+      "source": 0,
+      "sampler": 0
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "extensions": {
+        "KHR_materials_pbrSpecularGlossiness": {
+          "diffuseFactor": [
+            0.8,
+            0.8,
+            0.8,
+            1.0
+          ],
+          "diffuseTexture": {
+            "index": 0,
+            "texCoord": 0
+          },
+          "glossinessFactor": 0.5,
+          "specularFactor": [
+            0.2,
+            0.2,
+            0.2
+          ]
+        }
+      },
+      "name": "Material"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ]
+}

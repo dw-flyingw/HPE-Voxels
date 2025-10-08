@@ -5,25 +5,41 @@
       "byteOffset": 0,
       "componentType": 5126,
       "normalized": false,
-      "count": 15228,
+      "count": 7615,
       "type": "VEC3",
       "max": [
-        163.57467651367188,
-        230.5035400390625,
-        178.8619842529297
+        162.3943634033203,
+        229.2847900390625,
+        177.76889038085938
       ],
       "min": [
-        71.33627319335938,
-        163.35250854492188,
-        13.403742790222168
+        72.42987823486328,
+        163.90423583984375,
+        17.534395217895508
       ]
     },
     {
       "bufferView": 1,
       "byteOffset": 0,
+      "componentType": 5126,
+      "normalized": false,
+      "count": 7615,
+      "type": "VEC2",
+      "max": [
+        0.9999155402183533,
+        0.929663360118866
+      ],
+      "min": [
+        0.0004172899934928864,
+        0.0013327300548553467
+      ]
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 0,
       "componentType": 5125,
       "normalized": false,
-      "count": 91356,
+      "count": 45678,
       "type": "SCALAR"
     }
   ],
@@ -35,20 +51,26 @@
     {
       "buffer": 0,
       "byteOffset": 0,
-      "byteLength": 182736,
+      "byteLength": 91380,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteOffset": 182736,
-      "byteLength": 365424,
+      "byteOffset": 91380,
+      "byteLength": 60920,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 152300,
+      "byteLength": 182712,
       "target": 34963
     }
   ],
   "buffers": [
     {
       "uri": "scene.bin",
-      "byteLength": 548160
+      "byteLength": 335012
     }
   ],
   "meshes": [
@@ -56,9 +78,10 @@
       "primitives": [
         {
           "attributes": {
-            "POSITION": 0
+            "POSITION": 0,
+            "TEXCOORD_0": 1
           },
-          "indices": 1,
+          "indices": 2,
           "mode": 4,
           "material": 0
         }

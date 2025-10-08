@@ -182,8 +182,8 @@ If a specific prompt isn't defined, the system uses intelligent fallbacks:
    - "vertebra" or "c1-s1" → vertebra prompt
 
 2. **Vista3D label lookup:**
-   - Searches vista3d_label_colors.json
-   - Generates generic anatomical structure prompt
+   - Searches frontend/conf/vista3d_prompts.json
+   - Generates anatomically accurate prompt for the structure
 
 3. **Ultimate fallback:**
    ```
@@ -236,7 +236,7 @@ Example workflow:
 
 ## Supported Vista3D Structures
 
-The system supports all 130+ structures from vista3d_label_colors.json including:
+The system supports all 130+ structures from `frontend/conf/vista3d_prompts.json` including:
 
 **Major Categories:**
 - 20+ organs
@@ -248,7 +248,7 @@ The system supports all 130+ structures from vista3d_label_colors.json including
 - Glands and cartilage
 - Pathological structures (tumors, lesions, cysts)
 
-See `vista3d_label_colors.json` for the complete list.
+See `frontend/conf/vista3d_prompts.json` for the complete list.
 
 ## Technical Implementation
 
@@ -256,7 +256,9 @@ The prompt generation is handled in:
 - **File:** `frontend/logic/model_viewer_logic.py`
 - **Function:** `generate_texture_prompt(model_name: str)`
 - **Supporting:** `normalize_model_name(model_name: str)`
-- **Data Source:** `vista3d_label_colors.json`
+- **Data Sources:** 
+  - `frontend/conf/vista3d_prompts.json` - Texture generation prompts
+  - `frontend/conf/vista3d_label_colors.json` - Color definitions
 
 ---
 

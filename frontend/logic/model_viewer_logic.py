@@ -246,10 +246,9 @@ def extract_gltf_uv_coordinates(gltf_path: str) -> np.ndarray:
 def load_vista3d_prompts():
     """Load Vista3D texture generation prompts from JSON file."""
     try:
-        # Get the project root directory (two levels up from this file)
+        # Get the prompts file from conf directory
         current_dir = Path(__file__).resolve().parent
-        project_root = current_dir.parent.parent
-        prompts_json = project_root / "vista3d_prompts.json"
+        prompts_json = current_dir.parent / "conf" / "vista3d_prompts.json"
         
         with open(prompts_json, 'r') as f:
             data = json.load(f)

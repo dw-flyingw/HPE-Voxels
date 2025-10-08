@@ -419,7 +419,7 @@ Compare results to find optimal settings for your use case.
 
 - Contains multiple anatomical structures
 - Each label processed separately
-- Uses `vista3d_label_colors.json` for coloring
+- Uses `frontend/conf/vista3d_label_colors.json` for coloring
 - Parameters apply to ALL labels
 
 ```bash
@@ -633,17 +633,17 @@ python nifti2obj.py -i ./input -o ./output \
 ### Problem: Colors not applied correctly
 
 **Causes:**
-- Missing `vista3d_label_colors.json`
+- Missing `frontend/conf/vista3d_label_colors.json`
 - Name mismatch between file and JSON
 - Incorrect label IDs
 
 **Solutions:**
 ```bash
 # Verify color map exists
-ls vista3d_label_colors.json
+ls frontend/conf/vista3d_label_colors.json
 
 # Check for name matches
-cat vista3d_label_colors.json | grep -i "heart"
+cat frontend/conf/vista3d_label_colors.json | grep -i "heart"
 
 # Enable verbose mode to see matching
 python nifti2obj.py -i ./input -o ./output -v
@@ -707,5 +707,6 @@ python nifti2obj.py -i ./input -o ./output -v
 For more information, see:
 - [README.md](../README.md) - General project overview
 - [USAGE.md](../frontend/USAGE.md) - Viewer usage instructions
-- [vista3d_label_colors.json](../vista3d_label_colors.json) - Anatomical color definitions
+- [vista3d_label_colors.json](../frontend/conf/vista3d_label_colors.json) - Anatomical color definitions
+- [vista3d_prompts.json](../frontend/conf/vista3d_prompts.json) - Texture generation prompts
 

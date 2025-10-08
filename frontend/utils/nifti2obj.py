@@ -454,7 +454,10 @@ def process_directory(input_dir: str, output_dir: str, threshold: float,
                       close_boundaries: bool = False, hole_filling_method: str = 'convex'):
     os.makedirs(output_dir, exist_ok=True)
     nifti_files = glob.glob(os.path.join(input_dir, "*.nii.gz"))
-    label_info = load_label_info('vista3d_label_colors.json')
+    # Load label info from conf directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    label_colors_path = os.path.join(script_dir, '..', 'conf', 'vista3d_label_colors.json')
+    label_info = load_label_info(label_colors_path)
 
     if not nifti_files:
         print(f"No NIfTI files found in {input_dir}.", file=sys.stderr)

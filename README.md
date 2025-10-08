@@ -19,6 +19,9 @@ This project provides a complete pipeline for converting NIfTI medical imaging f
 ```
 HPE-Voxels/
 ├── frontend/             # Web-based viewers (Streamlit apps)
+│   ├── conf/             # Configuration files
+│   │   ├── vista3d_label_colors.json  # Anatomical color definitions
+│   │   └── vista3d_prompts.json       # Texture generation prompts
 │   ├── glb_viewer.py
 │   ├── model_viewer.py
 │   └── obj_viewer.py
@@ -38,8 +41,7 @@ HPE-Voxels/
 │           ├── scene.gltf
 │           └── textures/
 │               └── diffuse.png
-├── images/               # Reference images for texture generation
-└── vista3d_label_colors.json  # Anatomical color definitions
+└── images/               # Reference images for texture generation
 ```
 
 ## Installation
@@ -148,7 +150,10 @@ This structure ensures:
 ## Configuration
 
 ### Anatomical Colors
-The `vista3d_label_colors.json` file contains color definitions for different anatomical structures. The texture generators use this file to assign appropriate colors to models based on their names.
+The `frontend/conf/vista3d_label_colors.json` file contains color definitions for different anatomical structures. The texture generators use this file to assign appropriate colors to models based on their names.
+
+### Texture Generation Prompts
+The `frontend/conf/vista3d_prompts.json` file contains anatomically accurate prompts for AI texture generation using FLUX.1.
 
 ### Environment Variables
 - `MODEL_VIEWER_PORT`: Port for the model viewer (default: 8503)
