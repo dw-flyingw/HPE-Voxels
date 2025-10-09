@@ -8,6 +8,7 @@ python-dotenv>=1.0.0
 trimesh>=4.0.0
 numpy>=1.24.0
 scipy>=1.11.0
+xatlas>=0.0.6
 
 # Image Processing
 Pillow>=10.0.0
@@ -21,4 +22,11 @@ vtk>=9.2.0
 
 # NIfTI support
 nibabel>=5.1.0
+
+# Generative AI (Stable Diffusion)
+torch
+diffusers
+transformers
+accelerate
+opencv-python-headless
 

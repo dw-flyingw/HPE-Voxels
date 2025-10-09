@@ -9,11 +9,12 @@ This pipeline orchestrates all the utilities in frontend/utils:
 1. nifti2obj.py - Convert NIfTI to OBJ meshes
 2. add_uv_unwrap.py - Add UV coordinates to meshes (xatlas or spherical)
 3. obj2model.py - Convert OBJ directly to model directories (GLTF/GLB)
-4. create_uv_mask.py - Generate UV masks for FLUX.1
+4. create_uv_mask.py - Generate UV masks for texture generation
+5. generate_sd_texture.py - Generate textures using a local Stable Diffusion pipeline
 
 Requirements
 ------------
-All dependencies from frontend/requirements.txt
+All dependencies from frontend/requirements.txt, including PyTorch and Diffusers.
 
 Example
 -------
@@ -24,10 +25,10 @@ Example
     python pipeline.py -i ./my_nifti_files -o ./my_output
     
     # With custom processing parameters
-    python pipeline.py --smoothing 15 --decimation 0.3 --mask-size 2048
+    python pipeline.py --smoothing 15 --decimation 0.3 --mask-size 1024 --texture-size 1024
     
     # Skip certain steps
-    python pipeline.py --skip-masks --verbose
+    python pipeline.py --skip-textures --verbose
 """
 
 import argparse
@@ -66,7 +67,7 @@ class Pipeline:
         """Print a formatted step message."""
         print(f"\n{'='*70}")
         print(f"STEP {step}/{total}: {message}")
-        print(f"{'='*70}\n")
+        print(f"{ '='*70}\n")
     
     def run_command(self, cmd: List[str], step_name: str) -> bool:
         """Run a command and handle errors."""
@@ -127,7 +128,7 @@ class Pipeline:
         self.print_step(1, 5, "Converting NIfTI to OBJ meshes")
         
         cmd = [
-            "python",
+            sys.executable,
             str(self.utils_dir / "nifti2obj.py"),
             "-i", str(self.input_dir),
             "-o", str(self.obj_dir),
@@ -149,7 +150,7 @@ class Pipeline:
         self.print_step(2, 5, "Adding UV coordinates to OBJ meshes")
         
         cmd = [
-            "python",
+            sys.executable,
             str(self.utils_dir / "add_uv_unwrap.py"),
             "-i", str(self.obj_dir),
             "--in-place",
@@ -167,7 +168,7 @@ class Pipeline:
         self.print_step(3, 5, "Converting OBJ to model directories")
         
         cmd = [
-            "python",
+            sys.executable,
             str(self.utils_dir / "obj2model.py"),
             "-i", str(self.obj_dir),
             "-o", str(self.models_dir),
@@ -179,11 +180,11 @@ class Pipeline:
         return self.run_command(cmd, "OBJ → Models conversion")
     
     def step_create_uv_masks(self, mask_size: int = 1024, create_variants: bool = False) -> bool:
-        """Step 4: Create UV masks for FLUX.1 texture generation."""
-        self.print_step(4, 6, "Creating UV masks for FLUX.1")
+        """Step 4: Create UV masks for texture generation."""
+        self.print_step(4, 6, "Creating UV masks")
         
         cmd = [
-            "python",
+            sys.executable,
             str(self.utils_dir / "create_uv_mask.py"),
             "--models-dir", str(self.models_dir),
             "--size", str(mask_size),
@@ -200,12 +201,11 @@ class Pipeline:
     def step_generate_textures(
         self,
         texture_size: int = 1024,
-        guidance_scale: float = 3.5,
-        num_steps: int = 50,
-        flux_server: Optional[str] = None
+        guidance_scale: float = 7.5,
+        num_steps: int = 30
     ) -> bool:
-        """Step 5: Generate FLUX textures for all models."""
-        self.print_step(5, 6, "Generating FLUX.1 Textures")
+        """Step 5: Generate Stable Diffusion textures for all models."""
+        self.print_step(5, 6, "Generating Stable Diffusion Textures")
         
         # Get list of model directories
         if not self.models_dir.exists():
@@ -230,17 +230,14 @@ class Pipeline:
             print(f"\n[*] Generating texture for: {organ_name}")
             
             cmd = [
-                "python",
-                str(self.utils_dir / "generate_flux_texture.py"),
+                sys.executable,
+                str(self.utils_dir / "generate_sd_texture.py"),
                 "--organ", organ_name,
                 "--models-dir", str(self.models_dir),
                 "--size", str(texture_size),
                 "--guidance", str(guidance_scale),
                 "--steps", str(num_steps),
             ]
-            
-            if flux_server:
-                cmd.extend(["--server", flux_server])
             
             # Run texture generation
             if self.run_command(cmd, f"Texture generation for {organ_name}"):
@@ -254,7 +251,7 @@ class Pipeline:
         print(f"  - Successful: {success_count}/{len(model_dirs)}")
         if failed_models:
             print(f"  - Failed: {', '.join(failed_models)}")
-        print(f"{'='*70}\n")
+        print(f"{ '='*70}\n")
         
         # Return True if at least one succeeded
         return success_count > 0
@@ -278,17 +275,17 @@ class Pipeline:
             print(f"\nCreated model directories:")
             for model_dir in sorted(model_dirs):
                 has_mask = (model_dir / "uv_mask.png").exists()
-                has_flux_texture = (model_dir / "textures" / "flux_texture.png").exists()
+                has_sd_texture = (model_dir / "textures" / "sd_texture.png").exists()
                 has_texture = (model_dir / "textures" / "diffuse.png").exists()
                 mask_icon = "🎭" if has_mask else "  "
-                texture_icon = "🎨" if (has_flux_texture or has_texture) else "  "
-                flux_icon = "✨" if has_flux_texture else "  "
-                print(f"  {mask_icon} {texture_icon} {flux_icon} {model_dir.name}")
-            print(f"\n  🎭 = UV mask  🎨 = Texture  ✨ = FLUX texture")
+                texture_icon = "🎨" if (has_sd_texture or has_texture) else "  "
+                sd_icon = "🤖" if has_sd_texture else "  "
+                print(f"  {mask_icon} {texture_icon} {sd_icon} {model_dir.name}")
+            print(f"\n  🎭 = UV mask  🎨 = Texture  🤖 = Stable Diffusion texture")
         
         print(f"\nNext steps:")
         print(f"  1. View models with: python frontend/model_viewer.py")
-        print(f"  2. Regenerate textures: python frontend/utils/generate_flux_texture.py --organ <name>")
+        print(f"  2. Regenerate textures: python frontend/utils/generate_sd_texture.py --organ <name>")
         print(f"  3. See frontend/utils/README.md for more options")
         
         return True
@@ -309,7 +306,7 @@ class Pipeline:
         
         print("╔" + "═"*68 + "╗")
         print("║" + " "*15 + "Medical Imaging Pipeline" + " "*29 + "║")
-        print("║" + " "*7 + "NIfTI → OBJ → UV → Models → Masks → FLUX Textures" + " "*7 + "║")
+        print("║" + " "*7 + "NIfTI → OBJ → UV → Models → Masks → SD Textures" + " "*8 + "║")
         print("╚" + "═"*68 + "╝")
         
         # Check input files
@@ -347,14 +344,14 @@ class Pipeline:
         else:
             print("\n[Skipped] Step 4: UV mask creation")
         
-        # Step 5: Generate FLUX Textures
+        # Step 5: Generate Stable Diffusion Textures
         if not skip_textures:
             params = texture_params or {}
             if not self.step_generate_textures(**params):
                 print("\n⚠ Warning: Texture generation failed, but pipeline continues")
-                print("  Make sure FLUX server is running: cd backend && python flux_server.py")
+                print("  Make sure you have a CUDA-enabled GPU and dependencies are installed.")
         else:
-            print("\n[Skipped] Step 5: FLUX texture generation")
+            print("\n[Skipped] Step 5: Stable Diffusion texture generation")
         
         # Step 6: Summary
         self.step_summary()
@@ -365,27 +362,24 @@ class Pipeline:
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Complete pipeline: NIfTI → OBJ → GLB → Models → UV Masks",
+        description="Complete pipeline: NIfTI → OBJ → GLB → Models → UV Masks → Stable Diffusion Textures",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Run complete pipeline with defaults (includes FLUX textures)
+  # Run complete pipeline with defaults (includes local Stable Diffusion textures)
   python pipeline.py
   
   # Custom input/output
   python pipeline.py -i ./data/nifti -o ./data/output
   
   # High quality settings
-  python pipeline.py --smoothing 20 --decimation 0.2 --mask-size 2048 --texture-size 2048 --texture-steps 100
+  python pipeline.py --smoothing 20 --decimation 0.2 --mask-size 1024 --texture-size 1024 --texture-steps 50
   
-  # Skip texture generation (faster, requires FLUX server)
+  # Skip texture generation (fastest)
   python pipeline.py --skip-textures
   
   # Only regenerate textures for existing models
   python pipeline.py --skip-nifti --skip-uv-unwrap --skip-obj --skip-masks --overwrite
-  
-  # Custom FLUX server
-  python pipeline.py --flux-server 192.168.1.100:8000
         """
     )
     
@@ -457,32 +451,26 @@ Examples:
         help="Create all UV mask variants (binary, soft, filled)"
     )
     
-    # FLUX texture generation parameters
-    texture_group = parser.add_argument_group("FLUX texture generation options")
+    # Stable Diffusion texture generation parameters
+    texture_group = parser.add_argument_group("Stable Diffusion texture generation options")
     texture_group.add_argument(
         "--texture-size",
         type=int,
         default=1024,
-        choices=[512, 1024, 2048],
+        choices=[512, 768, 1024],
         help="Texture size in pixels (default: 1024)"
     )
     texture_group.add_argument(
         "--texture-steps",
         type=int,
-        default=50,
-        help="FLUX inference steps (default: 50, higher = better quality)"
+        default=30,
+        help="Stable Diffusion inference steps (default: 30, higher = better quality)"
     )
     texture_group.add_argument(
         "--texture-guidance",
         type=float,
-        default=3.5,
-        help="FLUX guidance scale (default: 3.5)"
-    )
-    texture_group.add_argument(
-        "--flux-server",
-        type=str,
-        default=None,
-        help="FLUX server address (default: from .env or localhost:8000)"
+        default=7.5,
+        help="Stable Diffusion guidance scale (default: 7.5)"
     )
     
     # Pipeline control
@@ -510,7 +498,7 @@ Examples:
     control_group.add_argument(
         "--skip-textures",
         action="store_true",
-        help="Skip FLUX texture generation"
+        help="Skip Stable Diffusion texture generation"
     )
     
     # General options
@@ -559,12 +547,11 @@ def main():
         'create_variants': args.mask_variants
     }
     
-    # FLUX texture parameters
+    # Stable Diffusion texture parameters
     texture_params = {
         'texture_size': args.texture_size,
         'guidance_scale': args.texture_guidance,
-        'num_steps': args.texture_steps,
-        'flux_server': args.flux_server
+        'num_steps': args.texture_steps
     }
     
     # Run pipeline
@@ -585,4 +572,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -155,13 +155,13 @@ def create_seamless_procedural_texture(
 
 
 def create_colon_texture(size: int) -> Image.Image:
-    """Create a realistic colon texture."""
+    """Create a realistic colon texture matching reference photo."""
     print(f"    Generating colon-specific texture...")
     
-    # Base colon colors
-    base_color = (139, 69, 19)  # Saddle brown
-    tissue_color = (160, 82, 45)  # Sienna
-    vessel_color = (101, 67, 33)  # Dark brown
+    # Base colon colors - matching reference photo
+    base_color = (180, 80, 90)  # Deep pink-red
+    tissue_color = (200, 100, 110)  # Lighter pink-red
+    vessel_color = (150, 60, 70)  # Darker pink-red
     
     # Create base texture
     texture = Image.new('RGB', (size, size), base_color)
@@ -227,7 +227,7 @@ def create_colon_texture(size: int) -> Image.Image:
             for i in range(len(fold_points)-1):
                 x1, y1 = fold_points[i]
                 x2, y2 = fold_points[i+1]
-                draw.line([x1, y1, x2, y2], fill=(120, 60, 30), width=3)
+                draw.line([x1, y1, x2, y2], fill=(160, 70, 80), width=3)
     
     return texture
 

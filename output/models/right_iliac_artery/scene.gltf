@@ -5,7 +5,7 @@
       "byteOffset": 0,
       "componentType": 5126,
       "normalized": false,
-      "count": 7615,
+      "count": 9230,
       "type": "VEC3",
       "max": [
         162.3943634033203,
@@ -23,15 +23,15 @@
       "byteOffset": 0,
       "componentType": 5126,
       "normalized": false,
-      "count": 7615,
+      "count": 9230,
       "type": "VEC2",
       "max": [
-        0.9999155402183533,
-        0.929663360118866
+        0.999588131904602,
+        0.9995867609977722
       ],
       "min": [
-        0.0004172899934928864,
-        0.0013327300548553467
+        0.00041186000453308225,
+        0.00041321999742649496
       ]
     },
     {
@@ -51,18 +51,18 @@
     {
       "buffer": 0,
       "byteOffset": 0,
-      "byteLength": 91380,
+      "byteLength": 110760,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteOffset": 91380,
-      "byteLength": 60920,
+      "byteOffset": 110760,
+      "byteLength": 73840,
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteOffset": 152300,
+      "byteOffset": 184600,
       "byteLength": 182712,
       "target": 34963
     }
@@ -70,7 +70,7 @@
   "buffers": [
     {
       "uri": "scene.bin",
-      "byteLength": 335012
+      "byteLength": 367312
     }
   ],
   "images": [
