@@ -9,6 +9,9 @@ trimesh>=4.0.0
 numpy>=1.24.0
 scipy>=1.11.0
 xatlas>=0.0.6
+pyyaml>=6.0
+addict>=2.4.0
+dataclasses-json>=0.6.0
 
 # Image Processing
 Pillow>=10.0.0
@@ -16,9 +19,11 @@ Pillow>=10.0.0
 # Networking
 requests>=2.31.0
 
+pydeck>=0.8.0
 # 3D Visualization (optional)
 pyvista>=0.42.0
 vtk>=9.2.0
+matplotlib
 
 # NIfTI support
 nibabel>=5.1.0
@@ -29,4 +34,3 @@ diffusers
 transformers
 accelerate
 opencv-python-headless
-

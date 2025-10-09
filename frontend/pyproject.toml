@@ -10,7 +10,7 @@ authors = [
     {name = "HPE Voxels Team", email = "team@hpe-voxels.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.8.1"
 license = {text = "MIT"}
 keywords = ["streamlit", "3d-viewer", "texture-generation", "medical-imaging", "model-viewer"]
 classifiers = [
